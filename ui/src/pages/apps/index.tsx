@@ -14,22 +14,26 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { Search } from '@/components/search'
 import ThemeSwitch from '@/components/theme-switch'
 import { UserNav } from '@/components/user-nav'
 import { Button } from '@/components/custom/button'
 import { family } from './data'
+import { FamilyDetail } from './components/modal'
 
 const appText = new Map<string, string>([
-  ['all', 'All Apps'],
-  ['connected', 'Connected'],
-  ['notConnected', 'Not Connected'],
+  ['all', 'All Families'],
+  ['free', 'Free'],
+  ['premium', 'Premium'],
 ])
 
 export default function Apps() {
   const [sort, setSort] = useState('ascending')
   const [appType, setAppType] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const toggleModal = () => setIsModalOpen(!isModalOpen);
 
   const filteredApps = family
     .sort((a, b) =>
@@ -46,12 +50,17 @@ export default function Apps() {
     )
     .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
+  const handleItemClick = (app) => {
+    toggleModal()
+    setSelectedItem(app)
+    { console.log(app) }
+  }
+
   return (
     <Layout fadedBelow fixedHeight>
       {/* ===== Top Heading ===== */}
       <LayoutHeader>
-        <div className='flex w-full items-center justify-between'>
-          <Search />
+        <div className='flex w-full items-center justify-end'>
           <div className='flex items-center space-x-4'>
             <ThemeSwitch />
             <UserNav />
@@ -72,7 +81,7 @@ export default function Apps() {
         <div className='my-4 flex items-end justify-between sm:my-0 sm:items-center'>
           <div className='flex flex-col gap-4 sm:my-4 sm:flex-row'>
             <Input
-              placeholder='Filter apps...'
+              placeholder='Filter families...'
               className='h-9 w-40 lg:w-[250px]'
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -82,9 +91,9 @@ export default function Apps() {
                 <SelectValue>{appText.get(appType)}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='all'>All Apps</SelectItem>
-                <SelectItem value='connected'>Connected</SelectItem>
-                <SelectItem value='notConnected'>Not Connected</SelectItem>
+                <SelectItem value='all'>All Families</SelectItem>
+                <SelectItem value='free'>Free</SelectItem>
+                <SelectItem value='premium'>Premium</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -116,7 +125,8 @@ export default function Apps() {
           {filteredApps.map((app) => (
             <li
               key={app.name}
-              className='rounded-lg border p-4 hover:shadow-md'
+              className='rounded-lg border p-4 hover:shadow-md cursor-pointer'
+              onClick={() => handleItemClick(app)}
             >
               <img
                 src={app.cover}
@@ -136,6 +146,9 @@ export default function Apps() {
               <div>
                 <h2 className='mb-1 font-semibold text-xs md:text-sm'>{app.name}</h2>
                 <p className='line-clamp-2 text-gray-500 text-xs md:text-sm'>{app.desc}</p>
+              </div>
+              <div>
+                {isModalOpen && <FamilyDetail isOpen={isModalOpen} onClose={toggleModal} item={selectedItem} />}
               </div>
             </li>
           ))}
