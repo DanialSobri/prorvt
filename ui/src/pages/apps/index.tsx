@@ -19,6 +19,7 @@ import { UserNav } from '@/components/user-nav'
 import { Button } from '@/components/custom/button'
 import { family } from './data'
 import { FamilyDetail } from './components/modal'
+import { Family } from './data'
 
 const appText = new Map<string, string>([
   ['all', 'All Families'],
@@ -31,7 +32,7 @@ export default function Apps() {
   const [appType, setAppType] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null as Family | null);
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
@@ -41,7 +42,7 @@ export default function Apps() {
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name)
     )
-    .filter((app) =>
+    .filter((app:Family) =>
       appType === 'free'
         ? app.freemium
         : appType === 'premium'
@@ -50,7 +51,7 @@ export default function Apps() {
     )
     .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  const handleItemClick = (app) => {
+  const handleItemClick = (app:Family) => {
     toggleModal()
     setSelectedItem(app)
     { console.log(app) }
@@ -148,7 +149,7 @@ export default function Apps() {
                 <p className='line-clamp-2 text-gray-500 text-xs md:text-sm'>{app.desc}</p>
               </div>
               <div>
-                {isModalOpen && <FamilyDetail isOpen={isModalOpen} onClose={toggleModal} item={selectedItem} />}
+                {isModalOpen && selectedItem && <FamilyDetail isOpen={isModalOpen} onClose={toggleModal} item={selectedItem} />}
               </div>
             </li>
           ))}

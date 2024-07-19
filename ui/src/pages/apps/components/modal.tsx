@@ -6,11 +6,12 @@ import {
 import { Button } from '@/components/custom/button'
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Family } from "../data";
 
 interface FamilyDetailProps {
     isOpen: boolean;
     onClose: () => void;
-    item: any;
+    item: Family;
 }
 
 export function FamilyDetail({ isOpen, onClose, item }: FamilyDetailProps) {

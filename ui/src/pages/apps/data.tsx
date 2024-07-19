@@ -1,22 +1,12 @@
-import {
-  IconBrandDiscord,
-  IconBrandDocker,
-  IconBrandFigma,
-  IconBrandGithub,
-  IconBrandGitlab,
-  IconBrandGmail,
-  IconBrandMedium,
-  IconBrandNotion,
-  IconBrandSkype,
-  IconBrandSlack,
-  IconBrandStripe,
-  IconBrandTelegram,
-  IconBrandTrello,
-  IconBrandWhatsapp,
-  IconBrandZoom,
-} from '@tabler/icons-react'
+export interface Family {
+  id: number
+  name: string
+  desc: string
+  freemium?: string
+  cover: string
+}
 
-export const family = [
+export const family:Family[] = [
   {
     id: 1,
     name: "Gallon Fuel Container",
