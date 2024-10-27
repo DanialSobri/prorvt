@@ -34,15 +34,15 @@ export default function Apps() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Families | null>(null);
   const [families, setFamilies] = useState<Families[]>([]);
+  const backendUrl = 'https://brezelbits.xyz';
+  const email = 'adanial091@gmail.com';
+  const password = 'pr0j3k1rv1!';
 
   useEffect(() => {
-    const pb = new PocketBase('http://210.195.96.20:8080');
+    const pb = new PocketBase(backendUrl);
 
     async function authenticateUser() {
       try {
-        const backendUrl = 'http://210.195.96.20:8080';
-        const email = 'adanial091@gmail.com';
-        const password = 'pr0j3k1rv1!';
 
         if (!email || !password) {
           console.error('Email or password environment variables are not set.');
@@ -77,6 +77,7 @@ export default function Apps() {
           thumbnail: backendUrl + "/api/files/" + record.collectionId + "/" + record.id + "/" + record.thumbnail, //http://210.195.96.20:8080/api/files/pfjvvyqwpr5vpng/2usiorck1p7fezz/pr_glss_master_skin_wardrobe_w0001_8yRRsxIHhZ.png?token=
           updated: record.updated,
         }));
+        console.log(familiesData);
         setFamilies(familiesData);
 
       } catch (error) {
@@ -84,7 +85,7 @@ export default function Apps() {
       }
     }
     authenticateUser();
-  },);
+  },[]);
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
