@@ -1,61 +1,112 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react';
 import {
   IconAdjustmentsHorizontal,
   IconSortAscendingLetters,
   IconSortDescendingLetters,
-} from '@tabler/icons-react'
-import { Layout, LayoutBody, LayoutHeader } from '@/components/custom/layout'
-import { Input } from '@/components/ui/input'
+} from '@tabler/icons-react';
+import { Layout, LayoutBody, LayoutHeader } from '@/components/custom/layout';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
-import ThemeSwitch from '@/components/theme-switch'
-import { UserNav } from '@/components/user-nav'
-import { Button } from '@/components/custom/button'
-import { family } from './data'
-import { FamilyDetail } from './components/modal'
-import { Family } from './data'
-
+} from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import ThemeSwitch from '@/components/theme-switch';
+import { UserNav } from '@/components/user-nav';
+import { Button } from '@/components/custom/button';
+import { FamilyDetail } from './components/modal';
+import PocketBase from 'pocketbase';
+import { Vendor, Category, Families } from '@/data/interfaces';
 const appText = new Map<string, string>([
   ['all', 'All Families'],
   ['free', 'Free'],
   ['premium', 'Premium'],
-])
+]);
 
 export default function Apps() {
-  const [sort, setSort] = useState('ascending')
-  const [appType, setAppType] = useState('all')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [token, setToken] = useState<string | null>(null);
+  const [sort, setSort] = useState('ascending');
+  const [appType, setAppType] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null as Family | null);
+  const [selectedItem, setSelectedItem] = useState<Families | null>(null);
+  const [families, setFamilies] = useState<Families[]>([]);
+
+  useEffect(() => {
+    const pb = new PocketBase('http://210.195.96.20:8080');
+
+    async function authenticateUser() {
+      try {
+        const backendUrl = 'http://210.195.96.20:8080';
+        const email = 'adanial091@gmail.com';
+        const password = 'pr0j3k1rv1!';
+
+        if (!email || !password) {
+          console.error('Email or password environment variables are not set.');
+          return;
+        }
+
+        const authData = await pb.collection('users').authWithPassword(email, password);
+        setToken(authData.token);
+        if (!token) {
+          // console.error('Authentication failed.');
+        }
+        // you can also fetch all records at once via getFullList
+        const records = await pb.collection('families').getFullList({
+          sort: '-created',
+          expand: 'category,vendor', // Include the category data
+        });
+
+        const familiesData: Families[] = records.map(record => ({
+          category: record.expand?.category as Category,
+          collectionId: record.collectionId,
+          collectionName: record.collectionName,
+          created: record.created,
+          desc: record.desc,
+          freemium: record.freemium,
+          id: record.id,
+          vendor: record.expand?.vendor as Vendor,
+          name: record.name,
+          nested_family: record.nested_family,
+          parametric: record.parametric,
+          rfa: backendUrl + "/api/files/" + record.collectionId + "/" + record.id + "/" + record.rfa,//http://210.195.96.20:8080/api/files/pfjvvyqwpr5vpng/2usiorck1p7fezz/pr_glss_master_skin_wardrobe_w0001_3LYg0SzxhI.rfa?token=
+          specification: record.specification,
+          thumbnail: backendUrl + "/api/files/" + record.collectionId + "/" + record.id + "/" + record.thumbnail, //http://210.195.96.20:8080/api/files/pfjvvyqwpr5vpng/2usiorck1p7fezz/pr_glss_master_skin_wardrobe_w0001_8yRRsxIHhZ.png?token=
+          updated: record.updated,
+        }));
+        setFamilies(familiesData);
+
+      } catch (error) {
+        console.error('Authentication failed:', error);
+      }
+    }
+    authenticateUser();
+  },);
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
-  const filteredApps = family
+  const filteredApps = families
     .sort((a, b) =>
       sort === 'ascending'
         ? a.name.localeCompare(b.name)
         : b.name.localeCompare(a.name)
     )
-    .filter((app:Family) =>
-      appType === 'free'
-        ? app.freemium
-        : appType === 'premium'
-          ? !app.freemium
-          : true
+    .filter((app: Families) => {
+      if (appType === 'all') {
+        return app;
+      }
+      return app.freemium === appType;
+    }
     )
-    .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const handleItemClick = (app:Family) => {
-    toggleModal()
-    setSelectedItem(app)
-    { console.log(app) }
-  }
+  const handleItemClick = (app: Families) => {
+    toggleModal();
+    setSelectedItem(app);
+  };
 
   return (
     <Layout fadedBelow fixedHeight>
@@ -130,16 +181,17 @@ export default function Apps() {
               onClick={() => handleItemClick(app)}
             >
               <img
-                src={app.cover}
+                src={app.thumbnail}
                 alt={app.name}
-                width={250}
-                height={330}
+                width={200}
+                height={200}
+                style={{ objectFit: 'cover', minWidth: '150px', minHeight: '150px', maxWidth: '150px', maxHeight: '150px' }}
               />
               <div className='mb-8 flex items-center justify-between'>
                 <Button
                   variant='outline'
                   size='sm'
-                  className={`${app.freemium ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
+                  className={`${app.freemium == "free" ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
                 >
                   {app.freemium == "free" ? 'Free' : 'Premium'}
                 </Button>
@@ -156,5 +208,5 @@ export default function Apps() {
         </ul>
       </LayoutBody>
     </Layout>
-  )
+  );
 }

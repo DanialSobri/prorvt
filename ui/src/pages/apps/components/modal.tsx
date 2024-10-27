@@ -6,15 +6,19 @@ import {
 import { Button } from '@/components/custom/button'
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Family } from "../data";
+import { Families } from "@/data/interfaces";
 
 interface FamilyDetailProps {
     isOpen: boolean;
     onClose: () => void;
-    item: Family;
+    item: Families;
 }
 
+
+
 export function FamilyDetail({ isOpen, onClose, item }: FamilyDetailProps) {
+
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[800px]">
@@ -23,15 +27,15 @@ export function FamilyDetail({ isOpen, onClose, item }: FamilyDetailProps) {
                         <div className='flex items-center justify-start'>
                             <Card className='p-4'>
                                 <img
-                                    src={item.cover}
+                                    src={item.thumbnail}
                                     alt={item.name}
                                     width={250}
                                     height={330}
                                 />
                                 <div className='flex items-center justify-start gap-2'>
                                     {item.freemium == "free" ? <Badge >Free</Badge>: <Badge variant={"secondary"}>Premium</Badge>}
-                                    <Badge variant={"outline"}>Parametric</Badge>
-                                    <Badge variant={"outline"}>Nested Family</Badge>
+                                    {item.parametric == true? <Badge variant={"outline"}>Parametric</Badge>:""}
+                                    {item.nested_family == true? <Badge variant={"outline"}>Nested Family</Badge>:""}
                                 </div>
                             </Card>
                         </div>
@@ -42,15 +46,16 @@ export function FamilyDetail({ isOpen, onClose, item }: FamilyDetailProps) {
                             </Card>
                             <Card className='p-4'>
                                 <h2 className='mb-1 font-semibold text-md md:text-md'>Details</h2>
-                                <p className=' text-gray-500 text-md md:text-md'>Dimension: 100x50</p>
-                                <p className=' text-gray-500 text-md md:text-md'>Weight: 50kg</p>
-                                <p className=' text-gray-500 text-md md:text-md'>Category: Skibidi Toilet</p>
+                                <p className=' text-gray-500 text-md md:text-md'>Vendor: {item.vendor.name.charAt(0).toUpperCase()+item.vendor.name.slice(1).toLowerCase()}</p>
+                                <p className=' text-gray-500 text-md md:text-md'>Category: {item.category.name.charAt(0).toUpperCase()+item.category.name.slice(1).toLowerCase()}</p>
                             </Card>
                         </div>
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button type="submit">Download</Button>
+                    <a href={item.rfa} target="_blank" rel="noopener noreferrer">
+                        <Button >Download</Button>
+                    </a>                
                 </DialogFooter>
             </DialogContent>
         </Dialog>
