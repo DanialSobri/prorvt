@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { IconBrandFacebook, IconBrandGithub, IconBrandGoogle } from '@tabler/icons-react'
 import {
   Form,
   FormControl,
@@ -16,8 +16,9 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/custom/button'
 import { PasswordInput } from '@/components/custom/password-input'
 import { cn } from '@/lib/utils'
+import PocketBase from 'pocketbase';
 
-interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> {}
+interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> { }
 
 const formSchema = z.object({
   email: z
@@ -35,7 +36,34 @@ const formSchema = z.object({
 })
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
+  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false)
+
+  const backendUrl = 'https://brezelbits.xyz';
+  const pb = new PocketBase(backendUrl);
+
+  async function authenticateUser(email, password) {
+    try {
+
+      if (!email || !password) {
+        console.error('Email or password environment variables are not set.');
+        return;
+      }
+
+      const authData = await pb.collection('users').authWithPassword(email, password);
+      console.log(authData.token)
+      // Save the token to local storage
+      localStorage.setItem('token', authData.token);
+
+      if (!authData.token) {
+        console.error('Authentication failed.');
+      }
+      window.location.href = '/apps'
+
+    } catch (error) {
+      console.error('Authentication failed:', error);
+    }
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,8 +75,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    console.log(data)
-
+    authenticateUser(data.email, data.password)
     setTimeout(() => {
       setIsLoading(false)
     }, 3000)
@@ -114,18 +141,9 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
                 className='w-full'
                 type='button'
                 loading={isLoading}
-                leftSection={<IconBrandGithub className='h-4 w-4' />}
+                leftSection={<IconBrandGoogle className='h-4 w-4' />}
               >
-                GitHub
-              </Button>
-              <Button
-                variant='outline'
-                className='w-full'
-                type='button'
-                loading={isLoading}
-                leftSection={<IconBrandFacebook className='h-4 w-4' />}
-              >
-                Facebook
+                Google
               </Button>
             </div>
           </div>

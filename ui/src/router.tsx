@@ -2,8 +2,18 @@ import { createBrowserRouter } from 'react-router-dom'
 import GeneralError from './pages/errors/general-error'
 import NotFoundError from './pages/errors/not-found-error'
 import MaintenanceError from './pages/errors/maintenance-error'
+import ProtectedRoute from '@/components/ProtectedRoute';
+import Dashboard from './pages/dashboard';
+import Apps from './pages/apps';
 
 const router = createBrowserRouter([
+  // Default route
+  {
+    path: '/',
+    lazy: async () => ({
+      Component: (await import('./pages/auth/sign-in')).default,
+    }),
+  },
   // Auth routes
   {
     path: '/sign-in',
@@ -38,7 +48,12 @@ const router = createBrowserRouter([
 
   // Main routes
   {
-    path: '/',
+    path: '/apps',
+    element: (
+      <ProtectedRoute>
+        <Apps />
+      </ProtectedRoute>
+    ),
     lazy: async () => {
       const AppShell = await import('./components/app-shell')
       return { Component: AppShell.default }

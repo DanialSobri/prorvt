@@ -10,8 +10,19 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import PocketBase from 'pocketbase'
+
 
 export function UserNav() {
+  const backendUrl = 'https://brezelbits.xyz';
+  const pb = new PocketBase(backendUrl);
+
+  const handleLogout = async () => {
+    await pb.authStore.clear()
+    localStorage.removeItem('token')
+    // Optionally, redirect to login page or show a message
+    window.location.href = '/sign-in'
+  }
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -48,7 +59,7 @@ export function UserNav() {
           <DropdownMenuItem>New Team</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onSelect={handleLogout}>
           Log out
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
         </DropdownMenuItem>
