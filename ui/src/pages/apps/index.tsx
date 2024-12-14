@@ -27,7 +27,6 @@ const appText = new Map<string, string>([
 ]);
 
 export default function Apps() {
-  const [token, setToken] = useState<string | null>(null);
   const [sort, setSort] = useState('ascending');
   const [appType, setAppType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,8 +34,6 @@ export default function Apps() {
   const [selectedItem, setSelectedItem] = useState<Families | null>(null);
   const [families, setFamilies] = useState<Families[]>([]);
   const backendUrl = 'https://brezelbits.xyz';
-  const email = 'adanial091@gmail.com';
-  const password = 'pr0j3k1rv1!';
 
   useEffect(() => {
     const pb = new PocketBase(backendUrl);
@@ -44,16 +41,11 @@ export default function Apps() {
     async function authenticateUser() {
       try {
 
-        if (!email || !password) {
-          console.error('Email or password environment variables are not set.');
-          return;
+        // Authenticate the user
+        if (!localStorage.getItem('token')) {
+          window.location.href = '/';
         }
 
-        const authData = await pb.collection('users').authWithPassword(email, password);
-        setToken(authData.token);
-        if (!token) {
-          // console.error('Authentication failed.');
-        }
         // you can also fetch all records at once via getFullList
         const records = await pb.collection('families').getFullList({
           sort: '-created',

@@ -1,7 +1,17 @@
 import { UserAuthForm } from './components/user-auth-form'
 import ViteLogo from '@/assets/vite.svg'
+import { useEffect } from 'react'
 
 export default function SignIn() {
+
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    console.log(token)
+    if (token) {
+      window.location.href = '/apps'
+    }
+  }, [])
+
   return (
     <>
       <div className='container relative grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0'>
@@ -38,7 +48,7 @@ export default function SignIn() {
                 helped me deliver stunning designs to my clients faster than
                 ever before.&rdquo;
               </p>
-              <footer className='text-sm'>Sofia Davis</footer>
+              <footer className='text-sm'>ProRVT Team</footer>
             </blockquote>
           </div>
         </div>

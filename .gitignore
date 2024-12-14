@@ -1,3 +1,6 @@
 backend/pb_data/data.db
 backend/pb_data/logs.db
 backend/pocketbase
+
+.DS_Store
+.venv
