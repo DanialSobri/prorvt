@@ -2,8 +2,6 @@ import { createBrowserRouter } from 'react-router-dom'
 import GeneralError from './pages/errors/general-error'
 import NotFoundError from './pages/errors/not-found-error'
 import MaintenanceError from './pages/errors/maintenance-error'
-import ProtectedRoute from '@/components/ProtectedRoute';
-import Dashboard from './pages/dashboard';
 import Apps from './pages/apps';
 
 const router = createBrowserRouter([
@@ -48,11 +46,8 @@ const router = createBrowserRouter([
 
   // Main routes
   {
-    path: '/apps',
     element: (
-      <ProtectedRoute>
         <Apps />
-      </ProtectedRoute>
     ),
     lazy: async () => {
       const AppShell = await import('./components/app-shell')
@@ -61,6 +56,7 @@ const router = createBrowserRouter([
     errorElement: <GeneralError />,
     children: [
       {
+        path: '/apps',
         index: true,
         lazy: async () => ({
           Component: (await import('./pages/apps')).default,

@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconBrandFacebook, IconBrandGithub, IconBrandGoogle } from '@tabler/icons-react'
+import { IconBrandGoogle } from '@tabler/icons-react'
 import {
   Form,
   FormControl,
@@ -36,13 +36,12 @@ const formSchema = z.object({
 })
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false)
 
   const backendUrl = 'https://brezelbits.xyz';
   const pb = new PocketBase(backendUrl);
 
-  async function authenticateUser(email, password) {
+  async function authenticateUser(email:string, password:string) {
     try {
 
       if (!email || !password) {

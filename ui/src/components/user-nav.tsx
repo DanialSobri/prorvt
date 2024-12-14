@@ -20,8 +20,7 @@ export function UserNav() {
   const handleLogout = async () => {
     await pb.authStore.clear()
     localStorage.removeItem('token')
-    // Optionally, redirect to login page or show a message
-    window.location.href = '/sign-in'
+    window.location.href = '/'
   }
   return (
     <DropdownMenu>
@@ -29,16 +28,16 @@ export function UserNav() {
         <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
           <Avatar className='h-8 w-8'>
             <AvatarImage src='/avatars/01.png' alt='@shadcn' />
-            <AvatarFallback>SN</AvatarFallback>
+            <AvatarFallback>{pb.authStore.model?.name.split(' ').map((word: string) => word.charAt(0).toUpperCase()).join('')}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className='w-56' align='end' forceMount>
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
-            <p className='text-sm font-medium leading-none'>satnaing</p>
+            <p className='text-sm font-medium leading-none'>{pb.authStore.model?.username}</p>
             <p className='text-xs leading-none text-muted-foreground'>
-              satnaingdev@gmail.com
+              {pb.authStore.model?.email}
             </p>
           </div>
         </DropdownMenuLabel>
