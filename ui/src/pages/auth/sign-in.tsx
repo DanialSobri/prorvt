@@ -57,8 +57,14 @@ export default function SignIn() {
             <div className='flex flex-col space-y-2 text-left'>
               <h1 className='text-2xl font-semibold tracking-tight'>Login</h1>
               <p className='text-sm text-muted-foreground'>
-                Enter your email and password below <br />
-                to log into your account
+                Enter your email and password below to log into your account. Don't have an account?{' '}
+              <a
+                href='/sign-up'
+                className='underline underline-offset-4 hover:text-primary'
+              >
+                Sign up
+              </a>
+              .
               </p>
             </div>
             <UserAuthForm />

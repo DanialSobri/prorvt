@@ -1,7 +1,7 @@
 import { HTMLAttributes, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
+import { IconBrandGoogle } from '@tabler/icons-react'
 import { z } from 'zod'
 import {
   Form,
@@ -15,11 +15,16 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/custom/button'
 import { PasswordInput } from '@/components/custom/password-input'
 import { cn } from '@/lib/utils'
+import PocketBase from 'pocketbase';
+import { toast } from '@/components/ui/use-toast'
 
-interface SignUpFormProps extends HTMLAttributes<HTMLDivElement> {}
+interface SignUpFormProps extends HTMLAttributes<HTMLDivElement> { }
 
 const formSchema = z
   .object({
+    username: z
+      .string()
+      .min(1, { message: 'Please enter your username' }),
     email: z
       .string()
       .min(1, { message: 'Please enter your email' })
@@ -42,19 +47,58 @@ const formSchema = z
 export function SignUpForm({ className, ...props }: SignUpFormProps) {
   const [isLoading, setIsLoading] = useState(false)
 
+  const backendUrl = 'https://brezelbits.xyz';
+  const pb = new PocketBase(backendUrl);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      username: '',
       email: '',
       password: '',
       confirmPassword: '',
     },
   })
 
-  function onSubmit(data: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
     console.log(data)
+    // Create a new user
+    const new_user = {
+      "username": data.username,
+      "email": data.email,
+      "emailVisibility": true,
+      "password": data.password,
+      "passwordConfirm": data.confirmPassword,
+      "name": data.username,
+      "subcription": "freemium"
+    };
 
+    try {
+      const record = await pb.collection('users').create(new_user);
+
+      if (!record.created) {
+        console.error('User creation failed.');
+      }
+      // Display success message
+      toast({
+        title: 'Account created successfully!🎉',
+        description: 'You have been signed up successfully.',
+        duration: 5000, // duration in milliseconds
+      });
+      // Automatically sign in the user
+      const authData = await pb.collection('users').authWithPassword(data.email, data.password);
+      localStorage.setItem('token', authData.token);
+      window.location.href = '/apps';
+
+    } catch (error) {
+      console.error('Error creating user:', error);
+      // Display error message
+      toast({
+        title: 'Account creation failed!',
+        description: 'An error occurred while signing up. Try again later.',
+      });
+    }
     setTimeout(() => {
       setIsLoading(false)
     }, 3000)
@@ -65,6 +109,19 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className='grid gap-2'>
+            <FormField
+              control={form.control}
+              name='username'
+              render={({ field }) => (
+                <FormItem className='space-y-1'>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input placeholder='username' {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name='email'
@@ -125,18 +182,9 @@ export function SignUpForm({ className, ...props }: SignUpFormProps) {
                 className='w-full'
                 type='button'
                 loading={isLoading}
-                leftSection={<IconBrandGithub className='h-4 w-4' />}
+                leftSection={<IconBrandGoogle className='h-4 w-4' />}
               >
-                GitHub
-              </Button>
-              <Button
-                variant='outline'
-                className='w-full'
-                type='button'
-                loading={isLoading}
-                leftSection={<IconBrandFacebook className='h-4 w-4' />}
-              >
-                Facebook
+                Google
               </Button>
             </div>
           </div>
