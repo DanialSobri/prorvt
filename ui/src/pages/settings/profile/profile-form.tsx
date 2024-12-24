@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { Link } from 'react-router-dom'
-import { useFieldArray, useForm } from 'react-hook-form'
+// import { useFieldArray, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { Button } from '@/components/custom/button'
 import {
   Form,
@@ -19,13 +20,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+// import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/use-toast'
-import { cn } from '@/lib/utils'
+// import { cn } from '@/lib/utils'
 import { zodResolver } from '@hookform/resolvers/zod'
+import PocketBase from 'pocketbase'
+
 
 const profileFormSchema = z.object({
   username: z
+    .string()
+    .min(2, {
+      message: 'Username must be at least 2 characters.',
+    })
+    .max(30, {
+      message: 'Username must not be longer than 30 characters.',
+    }),
+  name: z
     .string()
     .min(2, {
       message: 'Username must be at least 2 characters.',
@@ -60,16 +71,15 @@ const defaultValues: Partial<ProfileFormValues> = {
 }
 
 export default function ProfileForm() {
+
+  const pb = new PocketBase('https://brezelbits.xyz');
+  console.log(pb.authStore.record);
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
     mode: 'onChange',
   })
 
-  const { fields, append } = useFieldArray({
-    name: 'urls',
-    control: form.control,
-  })
 
   function onSubmit(data: ProfileFormValues) {
     toast({
@@ -92,11 +102,10 @@ export default function ProfileForm() {
             <FormItem>
               <FormLabel>Username</FormLabel>
               <FormControl>
-                <Input placeholder='shadcn' {...field} />
+                <Input placeholder={pb.authStore.record?.username} {...field} />
               </FormControl>
               <FormDescription>
-                This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
+                This is the language that will be used in the dashboard.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -111,18 +120,15 @@ export default function ProfileForm() {
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder='Select a verified email to display' />
+                    <SelectValue placeholder={pb.authStore.record?.email} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value='m@example.com'>m@example.com</SelectItem>
-                  <SelectItem value='m@google.com'>m@google.com</SelectItem>
-                  <SelectItem value='m@support.com'>m@support.com</SelectItem>
+                  <SelectItem value={pb.authStore.record?.email}>{pb.authStore.record?.email}</SelectItem>
                 </SelectContent>
               </Select>
               <FormDescription>
-                You can manage verified email addresses in your{' '}
-                <Link to='/examples/forms'>email settings</Link>.
+                This is the language that will be used in the dashboard.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -130,57 +136,36 @@ export default function ProfileForm() {
         />
         <FormField
           control={form.control}
-          name='bio'
+          name='name'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Bio</FormLabel>
+              <FormLabel>Name</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder='Tell us a little bit about yourself'
-                  className='resize-none'
-                  {...field}
-                />
+                <Input placeholder={pb.authStore.record?.name} {...field} />
               </FormControl>
               <FormDescription>
-                You can <span>@mention</span> other users and organizations to
-                link to them.
+                This is the language that will be used in the dashboard.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div>
-          {fields.map((field, index) => (
-            <FormField
-              control={form.control}
-              key={field.id}
-              name={`urls.${index}.value`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={cn(index !== 0 && 'sr-only')}>
-                    URLs
-                  </FormLabel>
-                  <FormDescription className={cn(index !== 0 && 'sr-only')}>
-                    Add links to your website, blog, or social media profiles.
-                  </FormDescription>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            className='mt-2'
-            onClick={() => append({ value: '' })}
-          >
-            Add URL
-          </Button>
-        </div>
+        <FormField
+          control={form.control}
+          name='name'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Subscription</FormLabel>
+              <FormControl>
+                <Input placeholder={pb.authStore.record?.subcription} {...field} />
+              </FormControl>
+              <FormDescription>
+                This is the language that will be used in the dashboard.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type='submit'>Update profile</Button>
       </form>
     </Form>

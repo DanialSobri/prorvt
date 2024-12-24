@@ -1,10 +1,6 @@
 import { Outlet } from 'react-router-dom'
 import {
-  IconBrowserCheck,
-  IconExclamationCircle,
-  IconNotification,
-  IconPalette,
-  IconTool,
+  IconCreditCard,
   IconUser,
 } from '@tabler/icons-react'
 import { Separator } from '@/components/ui/separator'
@@ -56,28 +52,18 @@ const sidebarNavItems = [
     href: '/settings',
   },
   {
-    title: 'Account',
-    icon: <IconTool size={18} />,
+    title: 'Subscription',
+    icon: <IconCreditCard size={18} />,
     href: '/settings/account',
   },
-  {
-    title: 'Appearance',
-    icon: <IconPalette size={18} />,
-    href: '/settings/appearance',
-  },
-  {
-    title: 'Notifications',
-    icon: <IconNotification size={18} />,
-    href: '/settings/notifications',
-  },
-  {
-    title: 'Display',
-    icon: <IconBrowserCheck size={18} />,
-    href: '/settings/display',
-  },
-  {
-    title: 'Error Example',
-    icon: <IconExclamationCircle size={18} />,
-    href: '/settings/error-example',
-  },
+  // {
+  //   title: 'Appearance',
+  //   icon: <IconPalette size={18} />,
+  //   href: '/settings/appearance',
+  // },
+  // {
+  //   title: 'Notifications',
+  //   icon: <IconNotification size={18} />,
+  //   href: '/settings/notifications',
+  // },
 ]
