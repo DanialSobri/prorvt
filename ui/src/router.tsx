@@ -9,7 +9,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     lazy: async () => ({
-      Component: (await import('./pages/auth/sign-in')).default,
+      Component: (await import('./pages/home')).default,
     }),
   },
   // Auth routes

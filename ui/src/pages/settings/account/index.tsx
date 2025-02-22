@@ -11,6 +11,7 @@ export default function SettingsAccount() {
           timezone.
         </p>
       </div>
+      
       <Separator />
       <AccountForm />
     </div>
