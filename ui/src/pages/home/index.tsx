@@ -1,6 +1,6 @@
 import { Button } from '@/components/custom/button';
 import React from 'react';
-import { Download, Globe, Zap, Building, Users, Clock, Lock, Unlock, Star, LogIn } from 'lucide-react';
+import { Download, Globe, Zap, Building, Lock, Unlock, Star, LogIn } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 const HomePage: React.FC = () => {
@@ -29,27 +29,45 @@ const HomePage: React.FC = () => {
                 <div className="container relative mx-auto px-4">
                     <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
                         <h1 className="text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-200 to-blue-400 leading-tight">
-                            Supercharge Your Revit Workflow with Regional Families
+                            Supercharge Your Revit Workflow
                         </h1>
                         <p className="text-2xl mb-8 text-blue-100/90 leading-relaxed">
-                            Access thousands of locally-relevant Revit families and transform your architectural design process
+                        Access a vast library of high-quality Revit families tailored for Malaysian architecture. Enhance your BIM workflow with our curated parametric components.
                         </p>
                         <div className="flex gap-6 justify-center">
                             <Button size="lg" 
-                                className="bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-cyan-500/50">
+                                className="bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-cyan-500/50"
+                                onClick={() => window.location.href = '/onboarding'}
+                            >
                                 <Download className="mr-2" /> Download Plugin
                             </Button>
                             <Button size="lg" 
-                                className="backdrop-blur-md bg-white/10 border-white/20 text-white hover:bg-white/20 transform hover:scale-105 transition-all duration-300">
+                                className="backdrop-blur-md bg-white/10 border-white/20 text-white hover:bg-white/20 transform hover:scale-105 transition-all duration-300"
+                                onClick={() => {
+                                    document.getElementById('features')?.scrollIntoView({ 
+                                        behavior: 'smooth',
+                                        block: 'start'
+                                    });
+                                }}
+                            >
                                 Learn More
                             </Button>
+                        </div>
+                        
+                        {/* Plugin Demo GIF */}
+                        <div className="mt-12 max-w-3xl mx-auto rounded-xl overflow-hidden shadow-2xl border border-white/20">
+                            <img 
+                                src="/images/snapshot.gif" 
+                                alt="ProRVT Plugin Demo" 
+                                className="w-full h-auto"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Features Section */}
-            <div className="py-32 relative overflow-hidden">
+            <div id="features" className="py-28 relative overflow-hidden">
                 <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]" />
                 <div className="container relative mx-auto px-4">
                     <h2 className="text-4xl font-bold text-center mb-16 text-white">Why Choose Our Plugin?</h2>
@@ -70,44 +88,6 @@ const HomePage: React.FC = () => {
                             description="Thousands of high-quality families at your fingertips"
                         />
                     </div>
-                </div>
-            </div>
-
-            {/* Benefits Section */}
-            <div className="relative py-32 bg-white overflow-hidden">
-                <div className="container mx-auto px-4 relative">
-                    <div className="max-w-3xl mx-auto">
-                        <h2 className="text-4xl font-bold text-center mb-12 text-gray-800 bg-clip-text">
-                            Transform Your Workflow
-                        </h2>
-                        <div className="space-y-8">
-                            <BenefitCard
-                                icon={<Clock className="w-8 h-8 text-blue-500" />}
-                                title="Save 70% of Your Time"
-                                description="Stop creating families from scratch - use our pre-built library"
-                            />
-                            <BenefitCard
-                                icon={<Users className="w-8 h-8 text-cyan-500" />}
-                                title="Team Collaboration"
-                                description="Share consistent families across your entire organization"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* CTA Section */}
-            <div className="relative py-24 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-cyan-500/20 backdrop-blur-md" />
-                <div className="container relative mx-auto px-4 text-center">
-                    <h2 className="text-4xl font-bold mb-6 text-white">Ready to Transform Your Revit Experience?</h2>
-                    <p className="text-xl mb-8 text-blue-100">
-                        Join thousands of architects who are already using our plugin
-                    </p>
-                    <Button size="lg" 
-                        className="bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-cyan-500/50">
-                        <Download className="mr-2" /> Download Now
-                    </Button>
                 </div>
             </div>
 
@@ -200,11 +180,28 @@ const HomePage: React.FC = () => {
                     <div className="mt-8 text-center text-gray-600 max-w-2xl mx-auto">
                         <p>
                             Need a custom solution for your business? 
-                            <a href="/contact" className="text-blue-600 font-semibold ml-1 hover:underline">
+                            <a href="https://www.linkedin.com/company/projectrvt" className="text-blue-600 font-semibold ml-1 hover:underline">
                                 Contact our sales team
                             </a>
                         </p>
                     </div>
+                </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="relative py-24 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-cyan-500/20 backdrop-blur-md" />
+                <div className="container relative mx-auto px-4 text-center">
+                    <h2 className="text-4xl font-bold mb-6 text-white">Ready to Transform Your Revit Experience?</h2>
+                    <p className="text-xl mb-8 text-blue-100">
+                        Join thousands of architects who are already using our plugin
+                    </p>
+                    <Button size="lg" 
+                        className="bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-500 hover:to-blue-600 text-white transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-cyan-500/50"
+                        onClick={() => window.location.href = '/onboarding'}
+                    >
+                        <Download className="mr-2" /> Get Started
+                    </Button>
                 </div>
             </div>
 
@@ -219,16 +216,15 @@ const HomePage: React.FC = () => {
                         <div>
                             <h4 className="text-lg font-semibold mb-4">Connect</h4>
                             <div className="flex space-x-4">
-                                <a href="#" className="text-gray-400 hover:text-blue-400">
-                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                                <a href="https://www.linkedin.com/company/projectrvt" 
+                                   target="_blank" 
+                                   rel="noopener noreferrer" 
+                                   className="text-gray-400 hover:text-blue-400 transition-colors">
+                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                                     </svg>
                                 </a>
-                                <a href="#" className="text-gray-400 hover:text-blue-400">
-                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" />
-                                    </svg>
-                                </a>
+                                {/* Remove or update other social media icons as needed */}
                             </div>
                         </div>
                     </div>
@@ -251,20 +247,5 @@ const FeatureCard: React.FC<{
     </div>
 );
 
-const BenefitCard: React.FC<{
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-}> = ({ icon, title, description }) => (
-    <div className="flex items-start space-x-6 bg-white p-8 rounded-xl border border-blue-100 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-        <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
-            {icon}
-        </div>
-        <div>
-            <h3 className="text-xl font-semibold mb-2 text-gray-800">{title}</h3>
-            <p className="text-gray-600">{description}</p>
-        </div>
-    </div>
-);
 
 export default HomePage;
