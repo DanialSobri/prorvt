@@ -12,6 +12,13 @@ const router = createBrowserRouter([
       Component: (await import('./pages/home')).default,
     }),
   },
+  // Onboarding
+  {
+    path: '/onboarding',
+    lazy: async () => ({
+      Component: (await import('./pages/onboarding')).default,
+    }),
+  },
   // Auth routes
   {
     path: '/sign-in',

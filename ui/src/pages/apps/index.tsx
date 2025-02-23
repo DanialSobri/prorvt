@@ -77,7 +77,7 @@ export default function Apps() {
       }
     }
     authenticateUser();
-  },[]);
+  }, []);
 
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
@@ -190,8 +190,10 @@ export default function Apps() {
                 </Button>
               </div>
               <div>
-                <h2 className='mb-1 font-semibold text-xs md:text-sm'>{app.name}</h2>
-                <p className='line-clamp-2 text-gray-500 text-xs md:text-sm'>{app.desc}</p>
+                <h2 className='mb-1 font-semibold text-xs md:text-sm'>{app.desc}</h2>
+                <p className='line-clamp-2 text-gray-500 text-xs md:text-sm'>  {app.category.name.toLowerCase().split(' ').map(word =>
+                  word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ')}</p>
               </div>
               <div>
                 {isModalOpen && selectedItem && <FamilyDetail isOpen={isModalOpen} onClose={toggleModal} item={selectedItem} />}

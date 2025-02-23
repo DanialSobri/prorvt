@@ -1,8 +1,10 @@
 import { UserAuthForm } from './components/user-auth-form'
-import ViteLogo from '@/assets/vite.svg'
 import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'; // Add this import at the top
 
 export default function SignIn() {
+
+  const navigate = useNavigate(); // Add this hook
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -19,7 +21,11 @@ export default function SignIn() {
           <div className='absolute inset-0 bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900' />
           <div className='absolute inset-0 bg-grid-white/[0.02] bg-[size:60px_60px]' />
           <div className='absolute inset-0 bg-gradient-to-b from-blue-600/20 via-transparent to-transparent backdrop-blur-sm' />
-          <div className='relative z-20 flex items-center text-lg font-medium'>
+          <div
+            className='relative z-20 flex items-center text-lg font-medium'
+            onClick={() => navigate('/')}
+            style={{ cursor: 'pointer' }}
+          >
             <svg
               xmlns='http://www.w3.org/2000/svg'
               viewBox='0 0 24 24'
@@ -36,11 +42,11 @@ export default function SignIn() {
           </div>
 
           <img
-            src={ViteLogo}
-            className='relative m-auto'
-            width={301}
-            height={60}
-            alt='Vite'
+            src="/images/snapshot.gif"
+            className="relative m-auto rounded-lg shadow-xl border border-white/20 backdrop-blur-sm"
+            width={500}
+            height={300}
+            alt="ProRVT Demo"
           />
 
           <div className='relative z-20 mt-auto'>
@@ -52,7 +58,7 @@ export default function SignIn() {
               </p>
               <footer className='text-sm'>ProRVT Team</footer>
             </blockquote>
-         </div>
+          </div>
         </div>
         <div className='lg:p-8'>
           <div className='mx-auto flex w-full flex-col justify-center space-y-2 sm:w-[350px]'>
@@ -60,13 +66,13 @@ export default function SignIn() {
               <h1 className='text-2xl font-semibold tracking-tight'>Login</h1>
               <p className='text-sm text-muted-foreground'>
                 Enter your email and password below to log into your account. Don't have an account?{' '}
-              <a
-                href='/sign-up'
-                className='underline underline-offset-4 hover:text-primary'
-              >
-                Sign up
-              </a>
-              .
+                <a
+                  href='/sign-up'
+                  className='underline underline-offset-4 hover:text-primary'
+                >
+                  Sign up
+                </a>
+                .
               </p>
             </div>
             <UserAuthForm />
