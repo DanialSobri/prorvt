@@ -131,7 +131,7 @@ const HomePage: React.FC = () => {
                                 </ul>
                             </CardContent>
                             <CardFooter>
-                                <Button variant="default" className="w-full" onClick={() => window.location.href = '/sign-up'}>
+                                <Button variant="default" className="w-full" onClick={() => window.location.href = '/onboarding'}>
                                     Start with Free Tier
                                 </Button>
                             </CardFooter>
@@ -170,7 +170,7 @@ const HomePage: React.FC = () => {
                                 </ul>
                             </CardContent>
                             <CardFooter>
-                                <Button variant="default" className="w-full">
+                                <Button variant="default" className="w-full" onClick={() => window.location.href = '/onboarding'}>
                                     Start with Premium Tier
                                 </Button>
                             </CardFooter>
