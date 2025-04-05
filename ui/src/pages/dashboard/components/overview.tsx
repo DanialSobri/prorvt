@@ -1,60 +1,45 @@
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts'
 
+// Updated data to represent Weekly downloads of Revit families
 const data = [
   {
-    name: 'Jan',
-    total: Math.floor(Math.random() * 5000) + 1000,
+    name: 'W1',
+    downloads: 14,
   },
   {
-    name: 'Feb',
-    total: Math.floor(Math.random() * 5000) + 1000,
+    name: 'W2',
+    downloads: 8,
   },
   {
-    name: 'Mar',
-    total: Math.floor(Math.random() * 5000) + 1000,
+    name: 'W3',
+    downloads: 17,
   },
   {
-    name: 'Apr',
-    total: Math.floor(Math.random() * 5000) + 1000,
+    name: 'W4',
+    downloads: 8,
   },
   {
-    name: 'May',
-    total: Math.floor(Math.random() * 5000) + 1000,
+    name: 'W5',
+    downloads: 16,
   },
   {
-    name: 'Jun',
-    total: Math.floor(Math.random() * 5000) + 1000,
+    name: 'W6',
+    downloads: 11,
   },
   {
-    name: 'Jul',
-    total: Math.floor(Math.random() * 5000) + 1000,
+    name: 'W7',
+    downloads: 7,
   },
   {
-    name: 'Aug',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Sep',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Oct',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Nov',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
-  {
-    name: 'Dec',
-    total: Math.floor(Math.random() * 5000) + 1000,
-  },
+    name: 'W8',
+    downloads: 12,
+  }
 ]
 
 export function Overview() {
   return (
     <ResponsiveContainer width='100%' height={350}>
-      <BarChart data={data}>
+      <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
         <XAxis
           dataKey='name'
           stroke='#888888'
@@ -67,13 +52,21 @@ export function Overview() {
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `$${value}`}
+        />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            borderRadius: '6px',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+            border: 'none'
+          }}
+          cursor={{ opacity: 0.5 }}
+          formatter={(value) => [`${value} downloads`, 'Downloads']}
         />
         <Bar
-          dataKey='total'
-          fill='currentColor'
+          dataKey='downloads'
+          fill='#000000'
           radius={[4, 4, 0, 0]}
-          className='fill-primary'
         />
       </BarChart>
     </ResponsiveContainer>

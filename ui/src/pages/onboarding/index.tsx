@@ -7,6 +7,8 @@ import { ArrowRight, Check, Download, UserPlus, Info, Star, CreditCard } from 'l
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import PocketBase from 'pocketbase';
+import { toast } from '@/components/ui/use-toast';
 
 // SignUpForm component
 const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
@@ -16,6 +18,10 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     const [name, setName] = useState('');
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    
+    // Initialize PocketBase
+    const backendUrl = 'https://brezelbits.xyz';
+    const pb = new PocketBase(backendUrl);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,22 +34,48 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
 
         setIsLoading(true);
         try {
-            // In a real app, you would call your API here
-            // const response = await fetch('/api/signup', {
-            //     method: 'POST',
-            //     body: JSON.stringify({ email, password, name }),
-            //     headers: { 'Content-Type': 'application/json' },
-            // });
+            // Create a new user with PocketBase
+            const userData = {
+                "username": name,
+                "email": email,
+                "emailVisibility": true,
+                "password": password,
+                "passwordConfirm": confirmPassword,
+                "name": name,
+                "subcription": "freemium"
+            };
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const record = await pb.collection('users').create(userData);
             
-            // if (!response.ok) throw new Error('Signup failed');
+            if (!record.created) {
+                throw new Error('User creation failed');
+            }
+            
+            // Display success toast
+            toast({
+                title: 'Account created successfully!🎉',
+                description: 'You have been signed up successfully.',
+                duration: 5000,
+            });
+            
+            // Authenticate the user
+            const authData = await pb.collection('users').authWithPassword(email, password);
+            
+            // Store auth token
+            localStorage.setItem('token', authData.token);
             
             // Call the onSuccess callback to notify parent component
             onSuccess();
         } catch (err) {
+            console.error('Error creating user:', err);
             setError(err instanceof Error ? err.message : 'An error occurred during signup');
+            
+            // Display error toast
+            toast({
+                title: 'Account creation failed!',
+                description: 'An error occurred while signing up. Please try again later.',
+                variant: 'destructive',
+            });
         } finally {
             setIsLoading(false);
         }
