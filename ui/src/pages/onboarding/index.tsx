@@ -15,45 +15,99 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [name, setName] = useState('');
     const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleSubmit = async (e: React.FormEvent) => {
+    const [success, setSuccess] = useState('');
+    const [isLoading, setIsLoading] = useState(false);const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        // Validate password length
+        if (password.length < 8) {
+            setError('Password must be at least 8 characters long');
+            return;
+        }
 
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             return;
         }
 
+        if (!email || !name) {
+            setError('Please fill in all required fields');
+            return;
+        }
+
         setIsLoading(true);
         try {
-            // In a real app, you would call your API here
-            // const response = await fetch('/api/signup', {
-            //     method: 'POST',
-            //     body: JSON.stringify({ email, password, name }),
-            //     headers: { 'Content-Type': 'application/json' },
-            // });
+            // Generate a username based on email (before the @ symbol) and add random number for uniqueness
+            const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 10000);
             
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Call the API to create a user
+            const response = await fetch('https://brezelbits.xyz/api/collections/users/records', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username,
+                    email,
+                    emailVisibility: true,
+                    password,
+                    passwordConfirm: password, // API requires passwordConfirm field
+                    name,
+                    subcription: 'freemium', // Default to freemium for new users
+                    user_type: 'user',
+                    plugin_installed: '',
+                    notification: 'welcome' // Initial notification
+                }),
+            });
             
-            // if (!response.ok) throw new Error('Signup failed');
+            const data = await response.json();
             
-            // Call the onSuccess callback to notify parent component
-            onSuccess();
+            if (!response.ok) {
+                // Handle specific error cases from the API
+                if (data.data?.email?.message) {
+                    throw new Error(`Email error: ${data.data.email.message}`);
+                } else if (data.data?.username?.message) {
+                    throw new Error(`Username error: ${data.data.username.message}`);
+                } else {
+                    throw new Error(data.message || 'Signup failed. Please try again.');
+                }
+            }
+              console.log('User created successfully:', data);
+            
+            // Save user data in localStorage for session management
+            if (data.token) {
+                localStorage.setItem('authToken', data.token);
+            }
+            
+            // Store user ID and other relevant information
+            if (data.id) {
+                localStorage.setItem('userId', data.id);
+                localStorage.setItem('userName', name);
+                localStorage.setItem('userEmail', email);
+            }
+            
+            // Show success message
+            setSuccess('Account created successfully!');
+            
+            // Call the onSuccess callback after a short delay to show the success message
+            setTimeout(() => {
+                onSuccess();
+            }, 1500);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred during signup');
         } finally {
             setIsLoading(false);
         }
-    };
-
-    return (
+    };    return (
         <form onSubmit={handleSubmit} className="space-y-4 mt-6">
             {error && (
                 <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
+            {success && (
+                <Alert className="bg-green-50 border-green-200">
+                    <Check className="h-4 w-4 text-green-600" />
+                    <AlertDescription className="text-green-700">{success}</AlertDescription>
                 </Alert>
             )}
             <div>
@@ -99,13 +153,20 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                     required
                     minLength={8}
                 />
-            </div>
-            <Button 
+            </div>            <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white"
                 disabled={isLoading}
             >
-                {isLoading ? 'Signing up...' : 'Create Account'}
+                {isLoading ? (
+                    <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Creating account...
+                    </span>
+                ) : 'Create Account'}
             </Button>
         </form>
     );
