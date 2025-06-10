@@ -12,7 +12,7 @@ import { UserNav } from '@/components/user-nav'
 import { Layout, LayoutBody, LayoutHeader } from '@/components/custom/layout'
 import { RecentFamilies } from './components/recent-sales'
 import { Overview } from './components/overview'
-import { Download, Settings, RefreshCcw, Calendar, Star, Clock, AlertCircle, FileDown, Search, MonitorCheck, Users, Cloud } from 'lucide-react'
+import { Download, Settings, Calendar, Star, Clock, FileDown, Search, MonitorCheck, Users, Cloud } from 'lucide-react'
 
 export default function Dashboard() {
   return (
