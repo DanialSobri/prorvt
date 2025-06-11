@@ -11,13 +11,16 @@ import { toast } from '@/components/ui/use-toast';
 
 // SignUpForm component
 const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
+    const [activeTab, setActiveTab] = useState<'signup' | 'login'>('signup');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [name, setName] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [isLoading, setIsLoading] = useState(false);const handleSubmit = async (e: React.FormEvent) => {
+    const [isLoading, setIsLoading] = useState(false);
+    
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
 
@@ -65,7 +68,9 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
             
             if (!response.ok) {
                 // Handle specific error cases from the API
-                if (data.data?.email?.message) {
+                if (data.data?.email?.code === "validation_not_unique") {
+                    throw new Error("Account already created for this email, proceed with login");
+                } else if (data.data?.email?.message) {
                     throw new Error(`Email error: ${data.data.email.message}`);
                 } else if (data.data?.username?.message) {
                     throw new Error(`Username error: ${data.data.username.message}`);
@@ -77,7 +82,7 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
             
             // Save user data in localStorage for session management
             if (data.token) {
-                localStorage.setItem('authToken', data.token);
+                localStorage.setItem('token', data.token);
             }
             
             // Store user ID and other relevant information
@@ -99,16 +104,108 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
             setError(err instanceof Error ? err.message : 'An error occurred during signup');
             
             // Display error toast
+            const errorMessage = err instanceof Error 
+                ? err.message 
+                : 'An error occurred while signing up. Please try again later.';
+            
+            const isDuplicateEmail = errorMessage.includes('Account already created for this email');
+            
             toast({
-                title: 'Account creation failed!',
-                description: 'An error occurred while signing up. Please try again later.',
+                title: isDuplicateEmail ? 'Account Already Exists' : 'Account creation failed!',
+                description: errorMessage,
+                variant: isDuplicateEmail ? 'default' : 'destructive',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };    const handleLoginSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+
+        if (!email || !password) {
+            setError('Please enter both email and password');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            // Call the API to login
+            const response = await fetch('https://brezelbits.xyz/api/collections/users/auth-with-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    identity: email,
+                    password
+                }),
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Login failed. Please check your credentials.');
+            }
+            
+            // Save user data in localStorage for session management
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+            }
+            
+            // Store user ID and other relevant information
+            if (data.record) {
+                localStorage.setItem('userId', data.record.id);
+                localStorage.setItem('userName', data.record.name);
+                localStorage.setItem('userEmail', data.record.email);
+            }
+            
+            // Show success message
+            setSuccess('Login successful!');
+            
+            // Call the onSuccess callback after a short delay to show the success message
+            setTimeout(() => {
+                onSuccess();
+            }, 1500);
+        } catch (err) {
+            console.error('Error logging in:', err);
+            setError(err instanceof Error ? err.message : 'An error occurred during login');
+            
+            // Display error toast
+            toast({
+                title: 'Login failed!',
+                description: 'Incorrect email or password. Please try again.',
                 variant: 'destructive',
             });
         } finally {
             setIsLoading(false);
         }
-    };    return (
-        <form onSubmit={handleSubmit} className="space-y-4 mt-6">
+    };
+
+    return (
+        <div className="mt-6">
+            <div className="flex border-b border-gray-200 mb-4">
+                <button
+                    className={`px-4 py-2 font-medium text-sm ${
+                        activeTab === 'signup'
+                            ? 'border-b-2 border-blue-500 text-blue-600'
+                            : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                    onClick={() => setActiveTab('signup')}
+                    type="button"
+                >
+                    Create Account
+                </button>
+                <button
+                    className={`px-4 py-2 font-medium text-sm ${
+                        activeTab === 'login'
+                            ? 'border-b-2 border-blue-500 text-blue-600'
+                            : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                    onClick={() => setActiveTab('login')}
+                    type="button"
+                >
+                    Login
+                </button>
+            </div>
+
             {error && (
                 <Alert variant="destructive">
                     <AlertDescription>{error}</AlertDescription>
@@ -120,70 +217,122 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                     <AlertDescription className="text-green-700">{success}</AlertDescription>
                 </Alert>
             )}
-            <div>
-                <Label htmlFor="name">Full Name</Label>
-                <Input 
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
-                    required
-                />
-            </div>
-            <div>
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="john@example.com"
-                    required
-                />
-            </div>
-            <div>
-                <Label htmlFor="password">Password</Label>
-                <Input 
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength={8}
-                />
-            </div>
-            <div>
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input 
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={8}
-                />
-            </div>            <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white"
-                disabled={isLoading}
-            >
-                {isLoading ? (
-                    <span className="flex items-center justify-center">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Creating account...
-                    </span>
-                ) : 'Create Account'}
-            </Button>
-        </form>
+
+            {activeTab === 'signup' ? (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="name">Full Name</Label>
+                        <Input 
+                            id="name"
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="John Doe"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input 
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="john@example.com"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="password">Password</Label>
+                        <Input 
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            minLength={8}
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="confirmPassword">Confirm Password</Label>
+                        <Input 
+                            id="confirmPassword"
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            minLength={8}
+                        />
+                    </div>
+                    <Button 
+                        type="submit" 
+                        className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <span className="flex items-center justify-center">
+                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Creating account...
+                            </span>
+                        ) : 'Create Account'}
+                    </Button>
+                </form>
+            ) : (
+                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                    <div>
+                        <Label htmlFor="loginEmail">Email</Label>
+                        <Input 
+                            id="loginEmail"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="john@example.com"
+                            required
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="loginPassword">Password</Label>
+                        <Input 
+                            id="loginPassword"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <Button 
+                        type="submit" 
+                        className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <span className="flex items-center justify-center">
+                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Logging in...
+                            </span>
+                        ) : 'Login'}
+                    </Button>
+                </form>
+            )}
+        </div>
     );
 };
 
 // Download Plugin Details component
 const DownloadPluginDetails: React.FC<{ onDownload: () => void }> = ({ onDownload }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    
+    const handleDownloadClick = () => {
+        setIsLoading(true);
+        onDownload();
+    };
+    
     return (
         <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <h4 className="text-lg font-semibold mb-2 text-blue-700">System Requirements</h4>
@@ -201,11 +350,24 @@ const DownloadPluginDetails: React.FC<{ onDownload: () => void }> = ({ onDownloa
             </Alert>
             
             <Button 
-                onClick={onDownload} 
+                onClick={handleDownloadClick} 
                 className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white"
+                disabled={isLoading}
             >
-                <Download className="mr-2 h-4 w-4" />
-                Download ProRVT Plugin
+                {isLoading ? (
+                    <span className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Preparing download...
+                    </span>
+                ) : (
+                    <>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download ProRVT Plugin
+                    </>
+                )}
             </Button>
         </div>
     );
@@ -522,13 +684,29 @@ const OnboardingPage: React.FC = () => {
     const navigate = useNavigate();
     const [currentStep, setCurrentStep] = useState(1);
     const [showSignUpForm, setShowSignUpForm] = useState(false);
-    const [isSignedIn, setIsSignedIn] = useState(false);
+    const [isSignedIn, setIsSignedIn] = useState(() => {
+        // Check if user is already signed in by looking for token in localStorage
+        // Using 'token' to match the same key used in apps/index.tsx
+        return !!localStorage.getItem('token');
+    });
     const [showDownloadDetails, setShowDownloadDetails] = useState(false);
     const [showInstallationGuide, setShowInstallationGuide] = useState(false);
     const [showSubscriptionOptions, setShowSubscriptionOptions] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState<'free' | 'premium' | null>(null);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const totalSteps = 4;
+    
+    // If user is already signed in, automatically skip to step 2
+    React.useEffect(() => {
+        if (isSignedIn && currentStep === 1) {
+            // Use a small delay to avoid an abrupt transition
+            const timer = setTimeout(() => {
+                setCurrentStep(2);
+                setShowDownloadDetails(true);
+            }, 500);
+            return () => clearTimeout(timer);
+        }
+    }, [isSignedIn, currentStep]);
 
     const steps = [
         {
@@ -562,8 +740,15 @@ const OnboardingPage: React.FC = () => {
     ];
 
     const handleContinue = (stepAction: () => void, stepId: number) => {
-        if (stepId === 1 && !isSignedIn) {
-            setShowSignUpForm(true);
+        if (stepId === 1) {
+            if (isSignedIn) {
+                // If user is already signed in, skip to the next step
+                setCurrentStep(2);
+                // Auto-expand download details when reaching step 2
+                setShowDownloadDetails(true);
+            } else {
+                setShowSignUpForm(true);
+            }
             return;
         }
         
@@ -594,17 +779,42 @@ const OnboardingPage: React.FC = () => {
     };
 
     const handleDownload = () => {
-        // Trigger download
-        window.location.href = 'https://brezelbits.xyz/api/files/4vgijwqgtjn1n1y/pblmz5j8jkspwo7/tecware_spectre_75_firmware_update_v1_ZWKZqlZWpL.0.zip';
-        
-        // Hide download details
-        setShowDownloadDetails(false);
-        
-        // Move to the next step and show subscription options
-        setTimeout(() => {
-            setCurrentStep(3);
-            setShowSubscriptionOptions(true);
-        }, 1000);
+        // Fetch the latest plugin info from the API
+        fetch('https://brezelbits.xyz/api/collections/plugin/records?sort=created')
+            .then(response => response.json())
+            .then(data => {
+                if (data.items && data.items.length > 0) {
+                    const latestPlugin = data.items[0];
+                    const downloadUrl = `https://brezelbits.xyz/api/files/${latestPlugin.collectionId}/${latestPlugin.id}/${latestPlugin.installer}`;
+                    
+                    // Trigger download with the dynamically generated URL
+                    window.location.href = downloadUrl;
+                    
+                    // Hide download details
+                    setShowDownloadDetails(false);
+                    
+                    // Move to the next step and show subscription options
+                    setTimeout(() => {
+                        setCurrentStep(3);
+                        setShowSubscriptionOptions(true);
+                    }, 1000);
+                } else {
+                    // Show error toast if no plugin data is available
+                    toast({
+                        title: "Download error",
+                        description: "Plugin installer information not found. Please try again later.",
+                        variant: "destructive"
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching plugin info:', error);
+                toast({
+                    title: "Download failed",
+                    description: "Could not retrieve the plugin installer. Please try again later.",
+                    variant: "destructive"
+                });
+            });
     };
 
     const handleSelectPlan = (isPremium: boolean) => {
@@ -692,7 +902,7 @@ const OnboardingPage: React.FC = () => {
                                         </p>
                                     </div>
                                     {step.id === currentStep && 
-                                     !(step.id === 1 && showSignUpForm) && 
+                                     !(step.id === 1 && (showSignUpForm || isSignedIn)) && 
                                      !(step.id === 3 && showSubscriptionOptions) &&
                                      step.id !== 4 && (
                                         <Button
@@ -710,8 +920,19 @@ const OnboardingPage: React.FC = () => {
                                     )}
                                 </div>
                                 
-                                {step.id === 1 && showSignUpForm && !isSignedIn && (
-                                    <SignUpForm onSuccess={handleSignUpSuccess} />
+                                {step.id === 1 && (
+                                    isSignedIn ? (
+                                        <div className="mt-6">
+                                            <Alert className="bg-green-50 border-green-200">
+                                                <Check className="h-4 w-4 text-green-600" />
+                                                <AlertDescription className="text-green-700">
+                                                    You're already signed in! You'll be automatically directed to the next step.
+                                                </AlertDescription>
+                                            </Alert>
+                                        </div>
+                                    ) : (
+                                        showSignUpForm && <SignUpForm onSuccess={handleSignUpSuccess} />
+                                    )
                                 )}
 
                                 {step.id === 2 && showDownloadDetails && (
