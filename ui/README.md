@@ -57,6 +57,11 @@ Start the server
   pnpm run dev
 ```
 
+Add ShadcnUI Components
+```bash
+  npx shadcn@latest add button
+```
+
 ## Author
 
 Crafted with 🤍 by [@satnaing](https://github.com/satnaing)

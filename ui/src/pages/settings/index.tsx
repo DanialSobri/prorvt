@@ -26,7 +26,7 @@ export default function Settings() {
             Settings
           </h1>
           <p className='text-muted-foreground'>
-            Manage your account settings and set e-mail preferences.
+            Manage your account settings and subscription.
           </p>
         </div>
         <Separator className='my-6' />

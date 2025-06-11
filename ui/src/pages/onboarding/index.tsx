@@ -7,6 +7,7 @@ import { ArrowRight, Check, Download, UserPlus, Info, Star, CreditCard } from 'l
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from '@/components/ui/use-toast';
 
 // SignUpForm component
 const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
@@ -38,6 +39,7 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
 
         setIsLoading(true);
         try {
+
             // Generate a username based on email (before the @ symbol) and add random number for uniqueness
             const username = email.split('@')[0] + '_' + Math.floor(Math.random() * 10000);
             
@@ -93,7 +95,15 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                 onSuccess();
             }, 1500);
         } catch (err) {
+            console.error('Error creating user:', err);
             setError(err instanceof Error ? err.message : 'An error occurred during signup');
+            
+            // Display error toast
+            toast({
+                title: 'Account creation failed!',
+                description: 'An error occurred while signing up. Please try again later.',
+                variant: 'destructive',
+            });
         } finally {
             setIsLoading(false);
         }

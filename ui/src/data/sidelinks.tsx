@@ -12,7 +12,7 @@ import {
   // IconHexagonNumber3,
   // IconHexagonNumber4,
   // IconHexagonNumber5,
-  // IconLayoutDashboard,
+  IconLayoutDashboard,
   // IconMessages,
   // IconRouteAltLeft,
   // IconServerOff,
@@ -34,12 +34,12 @@ export interface SideLink extends NavLink {
 }
 
 export const sidelinks: SideLink[] = [
-  // {
-  //   title: 'Dashboard',
-  //   label: '',
-  //   href: '/',
-  //   icon: <IconLayoutDashboard size={18} />,
-  // },
+  {
+    title: 'Dashboard',
+    label: '',
+    href: '/dashboard',
+    icon: <IconLayoutDashboard size={18} />,
+  },
   // {
   //   title: 'Tasks',
   //   label: '3',
