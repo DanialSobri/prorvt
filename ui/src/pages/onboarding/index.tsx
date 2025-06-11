@@ -7,7 +7,6 @@ import { ArrowRight, Check, Download, UserPlus, Info, Star, CreditCard } from 'l
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import PocketBase from 'pocketbase';
 import { toast } from '@/components/ui/use-toast';
 
 // SignUpForm component
