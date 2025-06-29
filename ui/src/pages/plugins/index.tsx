@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/custom/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Alert } from '@/components/ui/alert';
-import { Download, Check, Info, AlertCircle, HelpCircle } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { Download, Check, Info, HelpCircle } from 'lucide-react';
 import ThemeSwitch from '@/components/theme-switch';
 import { UserNav } from '@/components/user-nav';
 import { Layout, LayoutBody, LayoutHeader } from '@/components/custom/layout';
@@ -58,7 +56,6 @@ const PluginsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<'created' | 'updated'>('created');
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetch('https://brezelbits.xyz/api/collections/plugin/records?sort=-created')
@@ -67,7 +64,7 @@ const PluginsPage: React.FC = () => {
         setPlugins(data.items || []);
         setLoading(false);
       })
-      .catch(err => {
+      .catch(() => {
         setError('Failed to load plugins');
         setLoading(false);
       });
@@ -83,7 +80,6 @@ const PluginsPage: React.FC = () => {
   });
 
   const latest = filteredPlugins[0];
-  const rest = filteredPlugins.slice(1);
 
   return (
     <Layout fadedBelow fixedHeight>

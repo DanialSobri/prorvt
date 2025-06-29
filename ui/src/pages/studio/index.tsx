@@ -1,5 +1,4 @@
-import type React from "react"
-import { useState, useCallback, useRef, useEffect } from "react"
+import { useState, useCallback, useEffect } from "react"
 import {
   File,
   Download,
@@ -45,7 +44,7 @@ function getThumbnailUrl(item: any) {
 }
 
 export default function StudioPage() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [viewMode] = useState<"grid" | "list">("grid")
   const [searchTerm, setSearchTerm] = useState("")
   const [filterType, setFilterType] = useState("all")
   const [items, setItems] = useState<any[]>([])

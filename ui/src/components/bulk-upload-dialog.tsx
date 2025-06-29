@@ -1,27 +1,21 @@
-import React, { useState } from "react"
+import { useState } from "react"
 import {
-  File,
-  Upload,
-  Plus,
   X,
   ChevronRight,
   ChevronLeft,
   FileText,
   CheckCircle,
   AlertCircle,
-  Tag,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 // Predefined categories for suggestions
 const PREDEFINED_CATEGORIES = [
@@ -56,7 +50,6 @@ interface BulkUploadDialogProps {
 export function BulkUploadDialog({ open, onOpenChange }: BulkUploadDialogProps) {
   const [bulkUploadStep, setBulkUploadStep] = useState(1)
   const [rfaFiles, setRfaFiles] = useState<File[]>([])
-  const [thumbnailFiles, setThumbnailFiles] = useState<File[]>([])
   const [matchedItems, setMatchedItems] = useState<any[]>([])
   const [selectedBulkItems, setSelectedBulkItems] = useState<Set<string>>(new Set())
   const [bulkCategories, setBulkCategories] = useState<string[]>([])
@@ -102,7 +95,6 @@ export function BulkUploadDialog({ open, onOpenChange }: BulkUploadDialogProps) 
     // Reset all state
     setBulkUploadStep(1);
     setRfaFiles([]);
-    setThumbnailFiles([]);
     setMatchedItems([]);
     setSelectedBulkItems(new Set());
     setBulkCategories([]);
@@ -215,7 +207,6 @@ export function BulkUploadDialog({ open, onOpenChange }: BulkUploadDialogProps) 
               onDrop={e => {
                 e.preventDefault();
                 const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-                setThumbnailFiles(files);
                 setMatchedItems(matchThumbnailsToRfa(rfaFiles, files));
               }}
               onDragOver={e => e.preventDefault()}
@@ -226,7 +217,6 @@ export function BulkUploadDialog({ open, onOpenChange }: BulkUploadDialogProps) 
                 input.accept = 'image/*';
                 input.onchange = e => {
                   const files = Array.from((e.target as HTMLInputElement).files || []).filter(f => f.type.startsWith('image/'));
-                  setThumbnailFiles(files);
                   setMatchedItems(matchThumbnailsToRfa(rfaFiles, files));
                 };
                 input.click();
