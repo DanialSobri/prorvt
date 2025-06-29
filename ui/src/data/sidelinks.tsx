@@ -1,5 +1,5 @@
 import {
-  // IconApps,
+  IconApps,
   // IconBarrierBlock,
   IconBoxSeam,
   // IconChartHistogram,
@@ -14,10 +14,10 @@ import {
   // IconHexagonNumber5,
   IconLayoutDashboard,
   // IconMessages,
-  // IconRouteAltLeft,
+  IconRouteAltLeft,
   // IconServerOff,
   IconSettings,
-  // IconTruck,
+  IconTruck,
   // IconUserShield,
   // IconUsers,
 } from '@tabler/icons-react'
@@ -40,24 +40,24 @@ export const sidelinks: SideLink[] = [
     href: '/dashboard',
     icon: <IconLayoutDashboard size={18} />,
   },
-  // {
-  //   title: 'Tasks',
-  //   label: '3',
-  //   href: '/tasks',
-  //   icon: <IconChecklist size={18} />,
-  // },
-  // {
-  //   title: 'Chats',
-  //   label: '9',
-  //   href: '/chats',
-  //   icon: <IconMessages size={18} />,
-  // },
   {
     title: 'Discover',
     label: '',
     href: '/apps',
     icon: <IconBoxSeam size={18} />,
   },
+  {
+    title: 'Plugins',
+    label: 'New',
+    href: '/plugins',
+    icon: <IconApps size={18} />,
+  },
+  // {
+  //   title: 'Tasks',
+  //   label: '3',
+  //   href: '/tasks',
+  //   icon: <IconChecklist size={18} />,
+  // },
   // {
   //   title: 'Authentication',
   //   label: '',
@@ -102,26 +102,26 @@ export const sidelinks: SideLink[] = [
   //   href: '/users',
   //   icon: <IconUsers size={18} />,
   // },
-  // {
-  //   title: 'Requests',
-  //   label: '10',
-  //   href: '/requests',
-  //   icon: <IconRouteAltLeft size={18} />,
-  //   sub: [
-  //     {
-  //       title: 'Trucks',
-  //       label: '9',
-  //       href: '/trucks',
-  //       icon: <IconTruck size={18} />,
-  //     },
-  //     {
-  //       title: 'Cargos',
-  //       label: '',
-  //       href: '/cargos',
-  //       icon: <IconBoxSeam size={18} />,
-  //     },
-  //   ],
-  // },
+  {
+    title: 'Studio',
+    label: '10',
+    href: '/requests',
+    icon: <IconRouteAltLeft size={18} />,
+    sub: [
+      {
+        title: 'Analytic',
+        label: '9',
+        href: '/trucks',
+        icon: <IconTruck size={18} />,
+      },
+      {
+        title: 'Upload',
+        label: '',
+        href: '/cargos',
+        icon: <IconBoxSeam size={18} />,
+      },
+    ],
+  },
   // {
   //   title: 'Analysis',
   //   label: '',
