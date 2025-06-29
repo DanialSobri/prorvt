@@ -48,7 +48,7 @@ export const sidelinks: SideLink[] = [
   },
   {
     title: 'Plugins',
-    label: 'New',
+    label: '',
     href: '/plugins',
     icon: <IconApps size={18} />,
   },
