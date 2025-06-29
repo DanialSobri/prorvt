@@ -2,7 +2,7 @@ import {
   IconApps,
   // IconBarrierBlock,
   IconBoxSeam,
-  // IconChartHistogram,
+  IconChartHistogram,
   // IconChecklist,
   // IconComponents,
   // IconError404,
@@ -17,7 +17,7 @@ import {
   IconRouteAltLeft,
   // IconServerOff,
   IconSettings,
-  IconTruck,
+  // IconTruck,
   // IconUserShield,
   // IconUsers,
 } from '@tabler/icons-react'
@@ -96,32 +96,32 @@ export const sidelinks: SideLink[] = [
   //     },
   //   ],
   // },
-  // {
-  //   title: 'Users',
-  //   label: '',
-  //   href: '/users',
-  //   icon: <IconUsers size={18} />,
-  // },
   {
     title: 'Studio',
-    label: '10',
-    href: '/requests',
-    icon: <IconRouteAltLeft size={18} />,
-    sub: [
-      {
-        title: 'Analytic',
-        label: '9',
-        href: '/trucks',
-        icon: <IconTruck size={18} />,
-      },
-      {
-        title: 'Upload',
-        label: '',
-        href: '/cargos',
-        icon: <IconBoxSeam size={18} />,
-      },
-    ],
+    label: '',
+    href: '/studio',
+    icon: <IconBoxSeam size={18} />,
   },
+  // {
+  //   title: 'Studio',
+  //   label: '',
+  //   href: '/studio',
+  //   icon: <IconRouteAltLeft size={18} />,
+  //   sub: [
+  //     {
+  //       title: 'Analytic',
+  //       label: '9',
+  //       href: '/studio/analytic',
+  //       icon: <IconChartHistogram size={18} />,
+  //     },
+  //     {
+  //       title: 'Upload',
+  //       label: '',
+  //       href: '/studio/analytic',
+  //       icon: <IconBoxSeam size={18} />,
+  //     },
+  //   ],
+  // },
   // {
   //   title: 'Analysis',
   //   label: '',
