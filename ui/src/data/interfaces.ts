@@ -19,7 +19,7 @@ export interface Category {
 }
 
 export interface Families {
-    category: Category;
+    category: Category[];
     collectionId: string;
     collectionName: string;
     created: string;

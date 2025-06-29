@@ -53,7 +53,7 @@ export default function Apps() {
         });
 
         const familiesData: Families[] = records.map(record => ({
-          category: record.expand?.category as Category,
+          category: record.expand?.category as Category[],
           collectionId: record.collectionId,
           collectionName: record.collectionName,
           created: record.created,
@@ -190,14 +190,22 @@ export default function Apps() {
                 </Button>
               </div>
               <div>
-                <h2 className='mb-1 font-semibold text-xs md:text-sm'>{app.desc}</h2>
-                <p className='line-clamp-2 text-gray-500 text-xs md:text-sm'>
-                  {app?.category?.name ? 
-                    app.category.name.toLowerCase().split(' ')
-                      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                      .join(' ') 
-                    : 'Uncategorized'}
-                </p>
+                <h2 className='mb-1 font-semibold text-xs md:text-sm'>{app.name}</h2>
+                <div className='flex flex-wrap gap-1'>
+                  {app?.category && app.category.length > 0 ? 
+                    app.category.map((cat: Category, index: number) => (
+                      <span 
+                        key={index}
+                        className='inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full dark:bg-gray-800 dark:text-gray-300'
+                      >
+                        {cat.name.toLowerCase().split(' ')
+                          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                          .join(' ')}
+                      </span>
+                    ))
+                    : <span className='inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full dark:bg-gray-800 dark:text-gray-300'>Uncategorized</span>
+                  }
+                </div>
               </div>
               <div>
                 {isModalOpen && selectedItem && <FamilyDetail isOpen={isModalOpen} onClose={toggleModal} item={selectedItem} />}

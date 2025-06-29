@@ -76,9 +76,9 @@ const router = createBrowserRouter([
         }),
       },
       {
-        path: 'chats',
+        path: 'plugins',
         lazy: async () => ({
-          Component: (await import('@/components/coming-soon')).default,
+          Component: (await import('@/pages/plugins')).default,
         }),
       },
       {
@@ -88,9 +88,9 @@ const router = createBrowserRouter([
         }),
       },
       {
-        path: 'users',
+        path: 'studio',
         lazy: async () => ({
-          Component: (await import('@/components/coming-soon')).default,
+          Component: (await import('@/pages/studio')).default,
         }),
       },
       {
