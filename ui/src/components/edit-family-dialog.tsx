@@ -32,6 +32,7 @@ interface EditFamilyDialogProps {
   onOpenChange: (open: boolean) => void
   item: any | null
   onUpdate: (item: any) => void
+  categoriesList: any[]
 }
 
 function getThumbnailUrl(item: any) {
@@ -39,7 +40,7 @@ function getThumbnailUrl(item: any) {
   return `https://brezelbits.xyz/api/files/${item.collectionId}/${item.id}/${item.thumbnail}`;
 }
 
-export function EditFamilyDialog({ open, onOpenChange, item, onUpdate }: EditFamilyDialogProps) {
+export function EditFamilyDialog({ open, onOpenChange, item, onUpdate, categoriesList }: EditFamilyDialogProps) {
   const [isEditMode, setIsEditMode] = useState(false)
   const [editingItem, setEditingItem] = useState<Partial<any>>({})
 
@@ -54,13 +55,21 @@ export function EditFamilyDialog({ open, onOpenChange, item, onUpdate }: EditFam
     if (!item) return
     
     // Prepare the update data according to the API structure
+    let categoryValue = editingItem.category;
+    if (Array.isArray(categoryValue)) {
+      if (categoryValue.length === 1) {
+        categoryValue = categoryValue[0];
+      } else if (categoryValue.length === 0) {
+        categoryValue = "";
+      }
+    }
     const updateData = {
       SKU: editingItem.SKU || item.SKU || "",
       name: editingItem.name || item.name || "",
       desc: editingItem.desc || item.desc || "",
       freemium: editingItem.freemium || item.freemium || "free",
       vendor: editingItem.vendor || item.vendor || "pr", // Default vendor ID
-      category: editingItem.category || item.category || "fn", // Default category ID
+      category: categoryValue || item.category || "fn", // Default category ID
       parametric: editingItem.parametric !== undefined ? editingItem.parametric : item.parametric || true,
       nested_family: editingItem.nested_family !== undefined ? editingItem.nested_family : item.nested_family || true,
       specification: editingItem.specification || item.specification || "",
@@ -412,17 +421,47 @@ export function EditFamilyDialog({ open, onOpenChange, item, onUpdate }: EditFam
                   <div className="space-y-4">
                     <div>
                       <Label className="text-sm font-medium">Assigned Categories</Label>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {(item.expand?.category || []).map((cat: any) => (
-                          <Badge key={cat.name} variant="secondary" className="gap-1">
-                            <Tag className="w-3 h-3" />
-                            {cat.name}
-                          </Badge>
-                        ))}
-                        {(item.expand?.category || []).length === 0 && (
-                          <p className="text-sm text-muted-foreground">No categories assigned</p>
-                        )}
-                      </div>
+                      {isEditMode ? (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {categoriesList.map((cat: any) => {
+                            const selected = Array.isArray(editingItem.category)
+                              ? editingItem.category.includes(cat.id)
+                              : editingItem.category === cat.id;
+                            return (
+                              <label key={cat.id} className="flex items-center gap-2 cursor-pointer bg-muted rounded px-2 py-1">
+                                <input
+                                  type="checkbox"
+                                  checked={selected}
+                                  onChange={e => {
+                                    let newCategories: string[] = Array.isArray(editingItem.category)
+                                      ? [...editingItem.category]
+                                      : editingItem.category ? [editingItem.category] : [];
+                                    if (e.target.checked) {
+                                      if (!newCategories.includes(cat.id)) newCategories.push(cat.id);
+                                    } else {
+                                      newCategories = newCategories.filter(id => id !== cat.id);
+                                    }
+                                    setEditingItem({ ...editingItem, category: newCategories });
+                                  }}
+                                />
+                                <span>{cat.name}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {(item.expand?.category || []).map((cat: any) => (
+                            <Badge key={cat.name} variant="secondary" className="gap-1">
+                              <Tag className="w-3 h-3" />
+                              {cat.name}
+                            </Badge>
+                          ))}
+                          {(item.expand?.category || []).length === 0 && (
+                            <p className="text-sm text-muted-foreground">No categories assigned</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>

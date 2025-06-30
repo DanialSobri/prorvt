@@ -17,9 +17,9 @@ import { Separator } from '@/components/ui/separator';
 import ThemeSwitch from '@/components/theme-switch';
 import { UserNav } from '@/components/user-nav';
 import { Button } from '@/components/custom/button';
-import { FamilyDetail } from './components/modal';
 import PocketBase from 'pocketbase';
 import { Vendor, Category, Families } from '@/data/interfaces';
+
 const appText = new Map<string, string>([
   ['all', 'All Families'],
   ['free', 'Free'],
@@ -30,9 +30,8 @@ export default function Apps() {
   const [sort, setSort] = useState('ascending');
   const [appType, setAppType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<Families | null>(null);
   const [families, setFamilies] = useState<Families[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const backendUrl = 'https://brezelbits.xyz';
 
   useEffect(() => {
@@ -40,6 +39,7 @@ export default function Apps() {
 
     async function authenticateUser() {
       try {
+        setIsLoading(true);
 
         // Authenticate the user
         if (!localStorage.getItem('token')) {
@@ -74,12 +74,12 @@ export default function Apps() {
 
       } catch (error) {
         console.error('Authentication failed:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
     authenticateUser();
   }, []);
-
-  const toggleModal = () => setIsModalOpen(!isModalOpen);
 
   const filteredApps = families
     .sort((a, b) =>
@@ -95,11 +95,6 @@ export default function Apps() {
     }
     )
     .filter((app) => app.name.toLowerCase().includes(searchTerm.toLowerCase()));
-
-  const handleItemClick = (app: Families) => {
-    toggleModal();
-    setSelectedItem(app);
-  };
 
   return (
     <Layout fadedBelow fixedHeight>
@@ -166,53 +161,72 @@ export default function Apps() {
           </Select>
         </div>
         <Separator className='shadow' />
-        <ul className='no-scrollbar grid gap-4 overflow-y-scroll pb-16 pt-4 md:grid-cols-4 lg:grid-cols-5 grid-cols-2'>
-          {filteredApps.map((app) => (
-            <li
-              key={app.name}
-              className='rounded-lg border p-4 hover:shadow-md cursor-pointer'
-              onClick={() => handleItemClick(app)}
-            >
-              <img
-                src={app.thumbnail}
-                alt={app.name}
-                width={200}
-                height={200}
-                style={{ objectFit: 'cover', minWidth: '150px', minHeight: '150px', maxWidth: '150px', maxHeight: '150px' }}
-              />
-              <div className='mb-8 flex items-center justify-between'>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  className={`${app.freemium == "free" ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
-                >
-                  {app.freemium == "free" ? 'Free' : 'Premium'}
-                </Button>
-              </div>
-              <div>
-                <h2 className='mb-1 font-semibold text-xs md:text-sm'>{app.name}</h2>
-                <div className='flex flex-wrap gap-1'>
-                  {app?.category && app.category.length > 0 ? 
-                    app.category.map((cat: Category, index: number) => (
-                      <span 
-                        key={index}
-                        className='inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full dark:bg-gray-800 dark:text-gray-300'
-                      >
-                        {cat.name.toLowerCase().split(' ')
-                          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-                          .join(' ')}
-                      </span>
-                    ))
-                    : <span className='inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full dark:bg-gray-800 dark:text-gray-300'>Uncategorized</span>
-                  }
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading families...</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {filteredApps.length === 0 ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="text-4xl mb-4">🔍</div>
+                  <h3 className="text-lg font-semibold mb-2">No families found</h3>
+                  <p className="text-muted-foreground">
+                    Try adjusting your search terms or filters
+                  </p>
                 </div>
               </div>
-              <div>
-                {isModalOpen && selectedItem && <FamilyDetail isOpen={isModalOpen} onClose={toggleModal} item={selectedItem} />}
-              </div>
-            </li>
-          ))}
-        </ul>
+            ) : (
+              <ul className='no-scrollbar grid gap-4 overflow-y-scroll pb-16 pt-4 md:grid-cols-4 lg:grid-cols-5 grid-cols-2'>
+                {filteredApps.map((app) => (
+                  <li
+                    key={app.name}
+                    className='rounded-lg border p-4 hover:shadow-md'
+                  >
+                    <img
+                      src={app.thumbnail}
+                      alt={app.name}
+                      width={200}
+                      height={200}
+                      style={{ objectFit: 'cover', minWidth: '150px', minHeight: '150px', maxWidth: '150px', maxHeight: '150px' }}
+                    />
+                    <div className='mb-8 flex items-center justify-between'>
+                      <Button
+                        variant='outline'
+                        size='sm'
+                        className={`${app.freemium == "free" ? 'border border-blue-300 bg-blue-50 hover:bg-blue-100 dark:border-blue-700 dark:bg-blue-950 dark:hover:bg-blue-900' : ''}`}
+                      >
+                        {app.freemium == "free" ? 'Free' : 'Premium'}
+                      </Button>
+                    </div>
+                    <div>
+                      <h2 className='mb-1 font-semibold text-xs md:text-sm'>{app.name}</h2>
+                      <div className='flex flex-wrap gap-1'>
+                        {app?.category && app.category.length > 0 ? 
+                          app.category.map((cat: Category, index: number) => (
+                            <span 
+                              key={index}
+                              className='inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full dark:bg-gray-800 dark:text-gray-300'
+                            >
+                              {cat.name.toLowerCase().split(' ')
+                                .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                                .join(' ')}
+                            </span>
+                          ))
+                          : <span className='inline-block px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full dark:bg-gray-800 dark:text-gray-300'>Uncategorized</span>
+                        }
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
       </LayoutBody>
     </Layout>
   );

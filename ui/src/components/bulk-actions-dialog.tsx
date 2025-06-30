@@ -12,31 +12,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
-// Predefined categories for suggestions
-const PREDEFINED_CATEGORIES = [
-  "FURNITURE",
-  "CHAIRS",
-  "TABLES",
-  "STORAGE",
-  "CABINETS",
-  "DRAWERS",
-  "SHELVING",
-  "OFFICE",
-  "CONFERENCE",
-  "WORKSTATIONS",
-  "SEATING",
-  "DESKS",
-  "LIGHTING",
-  "DECORATIVE",
-  "OUTDOOR",
-]
-
 interface BulkActionsDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   selectedItems: Set<string>
   items: any[]
   onBulkAction: (actionType: string, value: any) => void
+  categoriesList: any[]
 }
 
 export function BulkActionsDialog({ 
@@ -44,7 +26,8 @@ export function BulkActionsDialog({
   onOpenChange, 
   selectedItems, 
   items, 
-  onBulkAction 
+  onBulkAction, 
+  categoriesList
 }: BulkActionsDialogProps) {
   const [bulkActionType, setBulkActionType] = useState<"freemium" | "parametric" | "categories">("freemium")
   const [bulkActionValue, setBulkActionValue] = useState<string>("")
@@ -198,14 +181,14 @@ export function BulkActionsDialog({
               <div>
                 <Label>Quick Add Categories</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {PREDEFINED_CATEGORIES.filter(cat => !bulkActionCategories.includes(cat)).map((category) => (
+                  {categoriesList.filter(cat => !bulkActionCategories.includes(cat.id)).map((cat) => (
                     <Button
-                      key={category}
+                      key={cat.id}
                       size="sm"
                       variant="outline"
-                      onClick={() => setBulkActionCategories(prev => [...prev, category])}
+                      onClick={() => setBulkActionCategories(prev => [...prev, cat.id])}
                     >
-                      {category}
+                      {cat.name}
                     </Button>
                   ))}
                 </div>
