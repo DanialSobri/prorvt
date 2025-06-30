@@ -20,6 +20,9 @@ export function UserNav() {
   const handleLogout = async () => {
     await pb.authStore.clear()
     localStorage.removeItem('token')
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userEmail');
     window.location.href = '/'
   }
   return (

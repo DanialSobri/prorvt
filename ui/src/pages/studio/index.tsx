@@ -37,6 +37,7 @@ import { Layout, LayoutBody, LayoutHeader } from '@/components/custom/layout'
 import { BulkUploadDialog } from '@/components/bulk-upload-dialog'
 import { BulkActionsDialog } from '@/components/bulk-actions-dialog'
 import { EditFamilyDialog } from '@/components/edit-family-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog"
 
 function getThumbnailUrl(item: any) {
   if (!item.thumbnail || !item.id || !item.collectionId) return "/placeholder.svg";
@@ -70,9 +71,10 @@ export default function StudioPage() {
   const [totalCategories, setTotalCategories] = useState(0);
   const [categoriesData, setCategoriesData] = useState<any[]>([]);
   const [categoriesList, setCategoriesList] = useState<any[]>([]);
+  const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
 
-  useEffect(() => {
-    console.log("Fetching families...");
+  // Families fetch logic extracted to a function
+  const fetchFamilies = useCallback(() => {
     const familiesToken = localStorage.getItem('token');
     fetch(`https://brezelbits.xyz/api/collections/families/records?expand=category&page=${page}&perPage=${perPage}`, {
       method: "GET",
@@ -83,7 +85,6 @@ export default function StudioPage() {
     })
       .then(res => res.json())
       .then(data => {
-        console.log("API response:", data);
         if (data && data.items) setItems(data.items)
         if (data && data.totalPages) setTotalPages(data.totalPages)
         if (data && data.totalItems) setTotalItems(data.totalItems)
@@ -93,8 +94,13 @@ export default function StudioPage() {
       });
   }, [page, perPage]);
 
-  // Fetch categories count
   useEffect(() => {
+    console.log("Fetching families...");
+    fetchFamilies();
+  }, [fetchFamilies]);
+
+  // Fetch categories count
+  const fetchCategories = useCallback(() => {
     console.log("Fetching categories...");
     const categoriesToken = localStorage.getItem('token');
     fetch(`https://brezelbits.xyz/api/collections/view_category/records`, {
@@ -114,6 +120,10 @@ export default function StudioPage() {
         console.error("Categories API error:", err);
       });
   }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   // Fetch categories from /api/collections/category/records
   useEffect(() => {
@@ -251,21 +261,15 @@ export default function StudioPage() {
       alert(`Failed to update ${failed.length} items. Please try again.`);
     }
 
-    // Update local state for successful updates
-    setItems((prev: any[]) => prev.map((item) => {
-      if (selectedItems.has(item.id)) {
-        const result = results.find((r: any) => r.id === item.id && !r.error);
-        if (result) {
-          return { ...item, ...result };
-        }
-      }
-      return item;
-    }));
+    // Refetch all families to ensure all components are up-to-date
+    fetchFamilies();
+    // Refetch categories for Top Categories card
+    fetchCategories();
 
     // Reset bulk action state
     setSelectedItems(new Set());
     setIsSelectionMode(false);
-  }, [selectedItems]);
+  }, [selectedItems, fetchFamilies, fetchCategories]);
 
   return (
     <Layout fadedBelow fixedHeight>
@@ -325,7 +329,12 @@ export default function StudioPage() {
           <div className="rounded-lg bg-gradient-to-br from-blue-50 to-indigo-100 border border-blue-200 px-6 py-4 min-w-[300px] flex-1">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-medium text-blue-900">Top Categories</span>
-              <Tag className="w-4 h-4 text-blue-600" />
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-blue-600" />
+                <Button size="sm" variant="ghost" className="px-2 py-1 text-xs" onClick={() => setIsCategoriesModalOpen(true)}>
+                  View All Categories
+                </Button>
+              </div>
             </div>
             <div className="space-y-3">
               {categoriesData
@@ -348,7 +357,7 @@ export default function StudioPage() {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-blue-900 truncate">{category.name}</p>
+                        <p className="text-sm font-medium text-blue-900 truncate">{category.name.charAt(0).toUpperCase() + category.name.slice(1).toLowerCase()}</p>
                         <div className="flex items-center gap-2">
                           <div className="flex-1 bg-blue-200 rounded-full h-1.5">
                             <div 
@@ -423,6 +432,24 @@ export default function StudioPage() {
               {isSelectionMode ? <X className="w-4 h-4" /> : <Check className="w-4 h-4" />}
               {isSelectionMode ? "Cancel" : "Select"}
             </Button>
+            
+            {/* Select All Button (only in selection mode) */}
+            {isSelectionMode && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => {
+                  if (selectedItems.size === filteredItems.length) {
+                    setSelectedItems(new Set());
+                  } else {
+                    setSelectedItems(new Set(filteredItems.map((item: any) => item.id)));
+                  }
+                }}
+              >
+                {selectedItems.size === filteredItems.length ? "Clear All" : "Select All"}
+              </Button>
+            )}
             
             {/* Bulk Actions Button - only show when items are selected */}
             {selectedItems.size > 0 && (
@@ -560,6 +587,50 @@ export default function StudioPage() {
         open={isBulkUploadOpen}
         onOpenChange={setIsBulkUploadOpen}
       />
+
+      {/* All Categories Modal */}
+      <Dialog open={isCategoriesModalOpen} onOpenChange={setIsCategoriesModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>All Categories</DialogTitle>
+            <DialogDescription>Browse all available categories and their family counts.</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto divide-y">
+            {categoriesData.length === 0 ? (
+              <div className="text-center text-muted-foreground py-8">No categories found.</div>
+            ) : (
+              categoriesData
+                .sort((a, b) => b.family_count - a.family_count)
+                .map((category) => (
+                  <div key={category.id} className="flex items-center gap-4 py-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      {category.icon ? (
+                        <img
+                          src={`https://brezelbits.xyz/api/files/${category.collectionId}/${category.id}/${category.icon}`}
+                          alt={category.name}
+                          className="w-6 h-6 object-contain"
+                        />
+                      ) : (
+                        <span className="text-blue-600 font-bold text-lg">
+                          {category.name.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-blue-900 truncate">{category.name.charAt(0).toUpperCase() + category.name.slice(1).toLowerCase()}</div>
+                    </div>
+                    <div className="text-sm text-blue-700 font-semibold">
+                      {category.family_count}
+                    </div>
+                  </div>
+                ))
+            )}
+          </div>
+          <DialogClose asChild>
+            <Button className="mt-4 w-full" variant="outline">Close</Button>
+          </DialogClose>
+        </DialogContent>
+      </Dialog>
     </Layout>
   )
 }
@@ -572,6 +643,15 @@ const FileCard = ({ item, isSelectionMode, selectedItems, handleSelectItem, hand
     onClick={() => handleItemClick(item)}
   >
     <CardContent className="p-4 relative">
+      {/* Free/Parametric Badges in top right, side by side */}
+      <div className="absolute top-2 right-2 flex flex-row items-center gap-1 z-20">
+        {item.freemium === "free" ? (
+          <Badge variant="secondary" className="text-xs px-2 py-0">Free</Badge>
+        ) : (
+          <Badge variant="default" className="text-xs px-2 py-0">Premium</Badge>
+        )}
+      </div>
+
       <div className="flex flex-col items-center space-y-3">
         {/* Selection Checkbox */}
         {isSelectionMode && (
@@ -586,7 +666,7 @@ const FileCard = ({ item, isSelectionMode, selectedItems, handleSelectItem, hand
         )}
 
         {/* File Icon/Thumbnail */}
-        <div className="relative w-16 h-16 flex items-center justify-center bg-muted rounded-lg group-hover:bg-muted/80 transition-colors">
+        <div className="relative w-16 h-16 flex items-center justify-center bg-muted rounded-lg group-hover:bg-muted/80 transition-colors mt-6">
           <Avatar className="w-16 h-16">
             <AvatarImage src={getThumbnailUrl(item)} alt={item.name} />
             <AvatarFallback>{item.name?.substring(0,2).toUpperCase()}</AvatarFallback>
@@ -596,10 +676,10 @@ const FileCard = ({ item, isSelectionMode, selectedItems, handleSelectItem, hand
           </div>
         </div>
 
-        {/* File Name */}
+        {/* File Name and Parametric/Standard */}
         <div className="text-center space-y-1 w-full">
           <h3 className="text-sm font-medium line-clamp-2 leading-tight">{item.name}</h3>
-          <p className="text-xs text-muted-foreground">{item.rfa.split(".").pop()?.toUpperCase()} File</p>
+          <p className="text-xs text-muted-foreground">{item.parametric ? 'Parametric' : 'Standard'}</p>
         </div>
 
         {/* Categories */}
@@ -609,20 +689,6 @@ const FileCard = ({ item, isSelectionMode, selectedItems, handleSelectItem, hand
               {cat.name}
             </Badge>
           ))}
-        </div>
-
-        {/* Additional Badges */}
-        <div className="flex flex-wrap gap-1 justify-center">
-          {item.freemium === "free" && (
-            <Badge variant="secondary" className="text-xs px-2 py-0">
-              Free
-            </Badge>
-          )}
-          {item.parametric && (
-            <Badge variant="outline" className="text-xs px-2 py-0">
-              Parametric
-            </Badge>
-          )}
         </div>
 
         {/* Action Buttons */}

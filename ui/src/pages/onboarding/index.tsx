@@ -86,11 +86,11 @@ const SignUpForm: React.FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
             }
             
             // Store user ID and other relevant information
-            if (data.id) {
+
                 localStorage.setItem('userId', data.id);
                 localStorage.setItem('userName', name);
                 localStorage.setItem('userEmail', email);
-            }
+            
             
             // Show success message
             setSuccess('Account created successfully!');

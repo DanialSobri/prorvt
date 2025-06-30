@@ -53,7 +53,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       console.log(authData.token)
       // Save the token to local storage
       localStorage.setItem('token', authData.token);
-
+          
       if (!authData.token) {
         console.error('Authentication failed.');
       }
