@@ -69,12 +69,17 @@ export default function StudioPage() {
   const [totalItems, setTotalItems] = useState(0);
   const [totalCategories, setTotalCategories] = useState(0);
   const [categoriesData, setCategoriesData] = useState<any[]>([]);
+  const [categoriesList, setCategoriesList] = useState<any[]>([]);
 
   useEffect(() => {
     console.log("Fetching families...");
+    const familiesToken = localStorage.getItem('token');
     fetch(`https://brezelbits.xyz/api/collections/families/records?expand=category&page=${page}&perPage=${perPage}`, {
       method: "GET",
-      headers: { "Content-Type": "application/json" }
+      headers: {
+        "Content-Type": "application/json",
+        ...(familiesToken ? { "Authorization": familiesToken } : {})
+      }
     })
       .then(res => res.json())
       .then(data => {
@@ -91,9 +96,13 @@ export default function StudioPage() {
   // Fetch categories count
   useEffect(() => {
     console.log("Fetching categories...");
+    const categoriesToken = localStorage.getItem('token');
     fetch(`https://brezelbits.xyz/api/collections/view_category/records`, {
       method: "GET",
-      headers: { "Content-Type": "application/json" }
+      headers: {
+        "Content-Type": "application/json",
+        ...(categoriesToken ? { "Authorization": categoriesToken } : {})
+      }
     })
       .then(res => res.json())
       .then(data => {
@@ -103,6 +112,27 @@ export default function StudioPage() {
       })
       .catch((err) => {
         console.error("Categories API error:", err);
+      });
+  }, []);
+
+  // Fetch categories from /api/collections/category/records
+  useEffect(() => {
+    console.log("Fetching categories (category/records)...");
+    const token = localStorage.getItem('token');
+    fetch(`https://brezelbits.xyz/api/collections/category/records`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { "Authorization": token } : {})
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log("/category/records API response:", data);
+        if (data && data.items) setCategoriesList(data.items)
+      })
+      .catch((err) => {
+        console.error("/category/records API error:", err);
       });
   }, []);
 
@@ -146,11 +176,12 @@ export default function StudioPage() {
     
     try {
       // Make the PATCH request
+      const updateToken = localStorage.getItem('token');
       const response = await fetch(`https://brezelbits.xyz/api/collections/families/records/${selectedItemForDetails.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJfcGJfdXNlcnNfYXV0aF8iLCJleHAiOjE3NTAzNzc1NDYsImlkIjoiMjVhaTZ6Nm9wdGU4amk3IiwidHlwZSI6ImF1dGhSZWNvcmQifQ.jmrOBkEQ957_-huKOnsRGKQvF4jbaAChbDJbPKgjw1c'
+          ...(updateToken ? { "Authorization": updateToken } : {})
         },
         body: JSON.stringify(updateData)
       });
@@ -177,31 +208,56 @@ export default function StudioPage() {
   }, [selectedItemForDetails]);
 
   // Bulk actions handler
-  const handleBulkAction = useCallback((actionType: string, value: any) => {
+  const handleBulkAction = useCallback(async (actionType: string, value: any) => {
     if (selectedItems.size === 0) return;
 
+    // Prepare update data for each action type
+    let updateData: any = {};
+    switch (actionType) {
+      case "freemium":
+        updateData = { freemium: value };
+        break;
+      case "parametric":
+        updateData = { parametric: value };
+        break;
+      case "categories":
+        updateData = { category: value };
+        break;
+    }
+
+    const updateToken = localStorage.getItem('token');
+    const promises = Array.from(selectedItems).map(async (id) => {
+      try {
+        const response = await fetch(`https://brezelbits.xyz/api/collections/families/records/${id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(updateToken ? { "Authorization": updateToken } : {})
+          },
+          body: JSON.stringify(updateData)
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      } catch (error) {
+        return { error, id };
+      }
+    });
+
+    const results = await Promise.all(promises);
+    const failed = results.filter((r: any) => r.error);
+    if (failed.length > 0) {
+      alert(`Failed to update ${failed.length} items. Please try again.`);
+    }
+
+    // Update local state for successful updates
     setItems((prev: any[]) => prev.map((item) => {
       if (selectedItems.has(item.id)) {
-        const updates: any = {};
-        
-        switch (actionType) {
-          case "freemium":
-            updates.freemium = value;
-            break;
-          case "parametric":
-            updates.parametric = value;
-            break;
-          case "categories":
-            // Add new categories to existing ones
-            const existingCategories = item.categories || [];
-            const newCategories = value.filter((cat: string) => !existingCategories.includes(cat));
-            if (newCategories.length > 0) {
-              updates.categories = [...existingCategories, ...newCategories];
-            }
-            break;
+        const result = results.find((r: any) => r.id === item.id && !r.error);
+        if (result) {
+          return { ...item, ...result };
         }
-        
-        return { ...item, ...updates };
       }
       return item;
     }));
@@ -460,6 +516,7 @@ export default function StudioPage() {
         onOpenChange={setIsDetailsModalOpen}
         item={selectedItemForDetails}
         onUpdate={handleUpdateItem}
+        categoriesList={categoriesList}
       />
 
       {/* Delete Confirmation Dialog */}
@@ -495,6 +552,7 @@ export default function StudioPage() {
         selectedItems={selectedItems}
         items={items}
         onBulkAction={handleBulkAction}
+        categoriesList={categoriesList}
       />
 
       {/* Bulk Upload Dialog */}
