@@ -45,9 +45,10 @@ const DEFAULT_BULK_VALUES = {
 interface BulkUploadDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  onComplete?: () => void
 }
 
-export function BulkUploadDialog({ open, onOpenChange }: BulkUploadDialogProps) {
+export function BulkUploadDialog({ open, onOpenChange, onComplete }: BulkUploadDialogProps) {
   const [bulkUploadStep, setBulkUploadStep] = useState(1)
   const [rfaFiles, setRfaFiles] = useState<File[]>([])
   const [matchedItems, setMatchedItems] = useState<any[]>([])
@@ -60,32 +61,28 @@ export function BulkUploadDialog({ open, onOpenChange }: BulkUploadDialogProps) 
   function matchThumbnailsToRfa(rfaFiles: File[], thumbnailFiles: File[]) {
     return rfaFiles.map(rfa => {
       const rfaName = rfa.name.replace(/\.rfa$/i, "");
-      
+      const nameParts = rfaName.split('_');
+      // SKU and desc: join from index 3 to end
+      const skuDesc = nameParts.length > 3 ? nameParts.slice(3).join(' ') : '';
       // Extract base name by removing the suffix after the last underscore
       const rfaBaseName = rfaName.includes('_') ? rfaName.substring(0, rfaName.lastIndexOf('_')) : rfaName;
-      
       const thumbnail = thumbnailFiles.find(img => {
         const imgName = img.name.replace(/\.(jpg|jpeg|png|gif|webp)$/i, "");
-        
         // Extract base name for thumbnail as well
         const imgBaseName = imgName.includes('_') ? imgName.substring(0, imgName.lastIndexOf('_')) : imgName;
-        
         return imgBaseName.toLowerCase() === rfaBaseName.toLowerCase();
       });
-      
       return {
         rfa,
         thumbnail,
-        matched: !!thumbnail,
-        name: rfaName,
-        id: rfa.name + (thumbnail ? thumbnail.name : ""),
-        SKU: "",
-        desc: "",
+        name: skuDesc,
+        SKU: rfaName,
+        desc: skuDesc,
         freemium: bulkDefaultValues.freemium,
         parametric: bulkDefaultValues.parametric,
         nested_family: bulkDefaultValues.nested_family,
-        categories: [],
-        newCategory: ""
+        categories: nameParts[1] ? [nameParts[1]] : [],
+        vendor: nameParts[2]
       };
     });
   }
@@ -678,7 +675,7 @@ export function BulkUploadDialog({ open, onOpenChange }: BulkUploadDialogProps) 
                 Back
               </Button>
               <Button 
-                onClick={() => {
+                onClick={async () => {
                   // Apply global categories to selected items
                   const updatedItems = matchedItems.map(item => {
                     if (selectedBulkItems.has(item.id)) {
@@ -691,9 +688,39 @@ export function BulkUploadDialog({ open, onOpenChange }: BulkUploadDialogProps) 
                   });
                   setMatchedItems(updatedItems);
                   
-                  // TODO: Here you would implement the actual upload logic
-                  console.log("Final items to upload:", updatedItems.filter(item => selectedBulkItems.has(item.id)));
-                  
+                  // Upload logic with file support
+                  const token = localStorage.getItem('token');
+                  const itemsToUpload = updatedItems.filter(item => selectedBulkItems.has(item.id));
+                  for (const item of itemsToUpload) {
+                    const formData = new FormData();
+                    formData.append('SKU', `"${item.SKU}"`);
+                    formData.append('name', `"${item.name}"`);
+                    formData.append('desc', `"${item.desc}"`);
+                    formData.append('freemium', `"${item.freemium}"`);
+                    formData.append('vendor', `"${item.vendor || ''}"`);
+                    formData.append('category', `"${item.categories[0] || ''}"`);
+                    formData.append('parametric', `"${item.parametric ? 'true' : 'false'}"`);
+                    formData.append('nested_family', `"${item.nested_family ? 'true' : 'false'}"`);
+                    formData.append('specification', `"${item.specification || ''}"`);
+                    formData.append('link_vendor', `"${item.link_vendor || ''}"`);
+                    formData.append('file_size', `"${item.rfa ? item.rfa.size.toString() : ''}"`);
+                    if (item.rfa) formData.append('rfa', item.rfa);
+                    if (item.thumbnail) formData.append('thumbnail', item.thumbnail);
+                    for (let [key, value] of formData.entries()) {
+                      if (value instanceof File) {
+                        console.log(`${key}: [File] name=${value.name}, size=${value.size}`);
+                      } else {
+                        console.log(`${key}:`, value);
+                      }
+                    }
+                    await fetch('https://brezelbits.xyz/api/collections/families/records', {
+                      method: 'POST',
+                      headers: token ? { 'Authorization': token } : undefined,
+                      body: formData
+                    });
+                  }
+                  // Call onComplete if provided
+                  if (onComplete) onComplete();
                   // Close the dialog and reset
                   handleClose();
                 }} 

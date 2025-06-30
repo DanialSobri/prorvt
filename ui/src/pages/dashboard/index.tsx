@@ -16,6 +16,7 @@ import { Download, Settings, Calendar, Star, Clock, FileDown, Search, MonitorChe
 import { useState, useEffect } from 'react'
 import { toast } from '@/components/ui/use-toast'
 import { useNavigate } from 'react-router-dom'
+import PocketBase from 'pocketbase'
 
 interface DashboardData {
   active_device_list: string
@@ -41,6 +42,19 @@ interface DashboardData {
   username: string
 }
 
+const backendUrl = 'https://brezelbits.xyz'
+const pb = new PocketBase(backendUrl)
+
+// Define Device type for clarity
+type Device = {
+  device: string;
+  os: string;
+  lastActive: string;
+  status: string;
+  loginTime: Date;
+  logoutTime: Date | null;
+};
+
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -57,7 +71,14 @@ export default function Dashboard() {
           return
         }
 
-        const response = await fetch('https://brezelbits.xyz/api/collections/view_dashboard/records/zzuavvvw73p30yi', {
+        const uid = pb.authStore.model?.id
+        if (!uid) {
+          setError('No user ID found in PocketBase authStore')
+          setLoading(false)
+          return
+        }
+
+        const response = await fetch('https://brezelbits.xyz/api/collections/view_dashboard/records/'+uid, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': token
@@ -103,41 +124,40 @@ export default function Dashboard() {
   }
 
   // Parse active devices data
-  const parseActiveDevices = (devicesString: string) => {
+  const parseActiveDevices = (devicesString: string): Device[] => {
     if (!devicesString) return []
     
-    // Handle the specific format: "088E90EE3171 (Login: 2025-06-08 04:26:51.714Z, Logout: 2025-06-15 02:18:53.897Z)"
-    const deviceMatch = devicesString.match(/^([A-F0-9]+)\s*\(Login:\s*([^,]+),\s*Logout:\s*([^)]+)\)$/)
+    // Split by comma, but keep device+info together
+    const deviceEntries = devicesString.split(/,(?=[A-F0-9]+\s*\(Login:)/g)
     
-    if (deviceMatch) {
-      const deviceId = deviceMatch[1]
-      const loginTime = new Date(deviceMatch[2])
-      const logoutTime = new Date(deviceMatch[3])
-      
-      // Format device ID as MAC address (add colons every 2 characters)
-      const formattedDeviceId = deviceId.match(/.{1,2}/g)?.join(':').toUpperCase() || deviceId
-      
-      // Determine if device is active based on logout time
-      const isActive = logoutTime > new Date()
-      
-      return [{
-        device: formattedDeviceId,
-        os: "Windows", // Default OS since not provided in API
-        lastActive: loginTime.toLocaleDateString('en-US', { 
-          year: 'numeric', 
-          month: 'short', 
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        }),
-        status: isActive ? 'Active' : 'Idle',
-        loginTime: loginTime,
-        logoutTime: logoutTime
-      }]
-    }
-    
-    // Fallback for other formats
-    return []
+    return deviceEntries.map(entry => {
+      // Match deviceId, login, and logout (logout may be empty)
+      const match = entry.match(/^\s*([A-F0-9]+)\s*\(Login:\s*([^,]+),\s*Logout:\s*([^)]*)\)/)
+      if (match) {
+        const deviceId = match[1]
+        const loginTime = new Date(match[2])
+        const logoutTime = match[3] ? new Date(match[3]) : null
+        const formattedDeviceId = deviceId.match(/.{1,2}/g)?.join(':').toUpperCase() || deviceId
+        // If logout is missing or in the future, device is Active
+        const isActive = !logoutTime || logoutTime > new Date()
+        return {
+          device: formattedDeviceId,
+          os: "Windows", // Default OS since not provided in API
+          lastActive: loginTime.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          }),
+          status: isActive ? 'Active' : 'Idle',
+          loginTime: loginTime,
+          logoutTime: logoutTime
+        }
+      }
+      // Fallback for other formats
+      return null
+    }).filter((d): d is Device => d !== null)
   }
 
   // Format date for display
@@ -436,7 +456,7 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-5">
                 {activeDevices.length > 0 ? (
-                  activeDevices.map((item, i) => (
+                  activeDevices.map((item: Device, i) => (
                     <div key={i} className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0">
                       <div className={`rounded-md p-2 mt-0.5 ${
                         item.status === 'Active' 
