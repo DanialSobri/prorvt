@@ -19,6 +19,13 @@ const router = createBrowserRouter([
       Component: (await import('./pages/onboarding')).default,
     }),
   },
+  // QR Code page
+  {
+    path: '/qr',
+    lazy: async () => ({
+      Component: (await import('./pages/qr')).default,
+    }),
+  },
   // Auth routes
   {
     path: '/sign-in',
