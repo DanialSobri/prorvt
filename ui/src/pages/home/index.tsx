@@ -1,7 +1,6 @@
 import { Button } from '@/components/custom/button';
 import React, { useState } from 'react';
-import { Download, Globe, Zap, Building, Lock, Unlock, Star, LogIn, X, CheckCircle, Clock, Rocket, Users, Calendar } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Download, Globe, Zap, Building, Lock, Star, LogIn, CheckCircle, Rocket, Users } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import PocketBase from 'pocketbase';
 
@@ -52,7 +51,7 @@ const HomePage: React.FC = () => {
                 "email": emailValue
             };
 
-            const record = await pb.collection('waitinglist').create(data);
+            await pb.collection('waitinglist').create(data);
             setShowSuccessModal(true);
             setEmail('');
         } catch (error) {
@@ -481,18 +480,5 @@ const HomePage: React.FC = () => {
         </div>
     );
 };
-
-const FeatureCard: React.FC<{
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-}> = ({ icon, title, description }) => (
-    <div className="group backdrop-blur-lg bg-white/10 p-8 rounded-2xl border border-white/20 hover:bg-white/20 transform hover:scale-105 transition-all duration-300">
-        <div className="mb-6 flex justify-center">{icon}</div>
-        <h3 className="text-2xl font-semibold mb-4 text-white group-hover:text-cyan-400 transition-colors">{title}</h3>
-        <p className="text-blue-100/75">{description}</p>
-    </div>
-);
-
 
 export default HomePage;
