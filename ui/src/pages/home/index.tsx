@@ -183,6 +183,8 @@ const HomePage: React.FC = () => {
                                     autoPlay
                                     muted
                                     loop
+                                    playsInline
+                                    webkit-playsinline="true"
                                 className="w-full h-auto"
                                 >
                                     Your browser does not support the video tag.
