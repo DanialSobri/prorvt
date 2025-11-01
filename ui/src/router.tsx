@@ -26,6 +26,13 @@ const router = createBrowserRouter([
       Component: (await import('./pages/qr')).default,
     }),
   },
+  // Portfolio page
+  {
+    path: '/portfolio',
+    lazy: async () => ({
+      Component: (await import('./pages/portfolio')).default,
+    }),
+  },
   // Auth routes
   {
     path: '/sign-in',

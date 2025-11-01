@@ -1,6 +1,6 @@
 import { Button } from '@/components/custom/button';
 import React, { useState } from 'react';
-import { Download, Globe, Zap, Building, Lock, Star, LogIn, CheckCircle, Rocket, Users } from 'lucide-react';
+import { Zap, Building, Star, LogIn } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import PocketBase from 'pocketbase';
 
@@ -80,11 +80,17 @@ const HomePage: React.FC = () => {
                 </a>
             </div>
 
-            {/* Floating Sign In Button */}
-            <div className="fixed top-6 right-6 z-50">
+            {/* Navigation */}
+            <div className="fixed top-6 right-6 z-50 flex items-center space-x-4">
+                {/* <a 
+                    href="/portfolio" 
+                    className="text-white hover:text-gray-300 transition-colors px-4 py-2"
+                >
+                    Portfolio
+                </a> */}
                 <Button
                     variant="outline"
-                    className="group relative overflow-hidden backdrop-blur-md bg-white/5 border-white/10 text-white px-6 py-2 hover:bg-white/10 transform hover:scale-105 transition-all duration-300"
+                    className="group relative overflow-hidden backdrop-blur-md bg-white/80 border-gray-300 text-gray-900 px-6 py-2 hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md"
                     onClick={() => window.location.href = '/sign-in'}
                 >
                     <span className="relative z-10 flex items-center gap-2">
@@ -92,7 +98,7 @@ const HomePage: React.FC = () => {
                         Sign In
                     </span>
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 group-hover:opacity-100 opacity-0 transition-opacity" />
-                    <div className="absolute inset-0 rounded-lg ring-1 ring-white/10 group-hover:ring-white/20 transition-all" />
+                    <div className="absolute inset-0 rounded-lg ring-1 ring-gray-200 group-hover:ring-gray-300 transition-all" />
                 </Button>
             </div>
 
@@ -223,10 +229,10 @@ const HomePage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Upcoming Features Preview */}
-            <div id="features" className="py-12 md:py-20 bg-white">
+            {/* Features Bento Grid */}
+            <div id="features" className="py-12 md:py-20 bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="container mx-auto px-4">
-                    <div className="max-w-6xl mx-auto">
+                    <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-12 md:mb-16">
                             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-gray-900 px-4">
                                 What's Coming in ProRVT?
@@ -237,153 +243,397 @@ const HomePage: React.FC = () => {
                         </p>
                     </div>
 
-                        {/* Feature Preview Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8 mb-12 md:mb-16">
-                            <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 md:p-6 rounded-xl border border-blue-200">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                                    <Building className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                        {/* Bento Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-auto md:grid-rows-2 gap-4 md:gap-6 max-w-6xl mx-auto mb-12 md:mb-16 max-h-[90vh]">
+                            {/* Smart Search Card - spans 2 columns */}
+                            <div className="col-span-1 md:col-span-2 row-span-1 bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
+                                        Find families.<br />
+                                        <span className="text-green-500">Instantly.</span>
+                                    </h3>
+                                    <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6 max-w-lg">
+                                        AI-powered search that works at the speed of thought.
+                                    </p>
                                 </div>
-                                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">Malaysian Architecture Library</h3>
-                                <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4">500+ families designed specifically for Malaysian building standards and architectural styles.</p>
-                                <div className="text-xs text-blue-600 font-medium">Launch Feature</div>
+                                <div className="flex-1 flex items-center justify-center relative mt-6 z-0">
+                                    <div className="relative w-40 h-40 md:w-48 md:h-48">
+                                        {/* Background glow effect */}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full blur-3xl animate-pulse"></div>
+                                        
+                                        {/* Main lightning bolt */}
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="relative">
+                                                <div className="text-6xl md:text-7xl text-green-500 animate-pulse filter drop-shadow-2xl">
+                                                    ⚡
+                                                </div>
+                                                {/* Lightning glow effect */}
+                                                <div className="absolute inset-0 text-6xl md:text-7xl text-green-400 animate-pulse blur-sm opacity-50">
+                                                    ⚡
+                                                </div>
+                                            </div>
                             </div>
 
-                            <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 md:p-6 rounded-xl border border-green-200">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-green-600 rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                                    <Zap className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                                        {/* Enhanced particles */}
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="absolute w-2 h-2 bg-green-500 rounded-full animate-bounce shadow-xl" style={{top: '12%', left: '8%', animationDelay: '0s'}}></div>
+                                            <div className="absolute w-2 h-2 bg-green-400 rounded-full animate-bounce shadow-xl" style={{top: '8%', right: '12%', animationDelay: '0.5s'}}></div>
+                                            <div className="absolute w-2 h-2 bg-emerald-500 rounded-full animate-bounce shadow-xl" style={{bottom: '12%', left: '4%', animationDelay: '1s'}}></div>
+                                            <div className="absolute w-2 h-2 bg-emerald-400 rounded-full animate-bounce shadow-xl" style={{bottom: '8%', right: '8%', animationDelay: '1.5s'}}></div>
+                                            
+                                            {/* Additional sparkle effects */}
+                                            <div className="absolute w-1 h-1 bg-yellow-400 rounded-full animate-ping" style={{top: '20%', left: '20%', animationDelay: '0.3s'}}></div>
+                                            <div className="absolute w-1 h-1 bg-yellow-300 rounded-full animate-ping" style={{bottom: '20%', right: '20%', animationDelay: '0.8s'}}></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">Smart Search & Filter</h3>
-                                <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4">AI-powered search to find the perfect families in seconds, not minutes.</p>
-                                <div className="text-xs text-green-600 font-medium">Launch Feature</div>
+                                <div className="flex gap-2 mt-6">
+                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                </div>
                             </div>
 
-                            <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-4 md:p-6 rounded-xl border border-purple-200">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                                    <Download className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                            {/* Library Card - tall, spans 2 rows */}
+                            <div className="col-span-1 md:col-span-1 md:row-span-2 bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
+                                        Built for<br />
+                                        <span className="text-blue-500">Malaysia.</span>
+                                    </h3>
+                                    <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6">
+                                        500+ families designed for local standards.
+                                    </p>
                                 </div>
-                                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">One-Click Installation</h3>
-                                <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4">Seamless integration with Revit. No complex setup or configuration required.</p>
-                                <div className="text-xs text-purple-600 font-medium">Launch Feature</div>
+                                <div className="flex-1 flex items-center justify-center relative mt-6 z-0">
+                                    <div className="flex gap-4 items-end">
+                                        {/* Building 1 - Tallest */}
+                                        <div className="w-16 h-24 md:w-20 md:h-28 bg-gradient-to-t from-blue-700 via-blue-600 to-blue-500 rounded-2xl relative shadow-2xl animate-pulse">
+                                            {/* Building number */}
+                                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-3xl md:text-4xl font-bold text-blue-500 drop-shadow-lg z-5">
+                                                500+
+                                            </div>
+                                            
+                                            {/* Windows grid */}
+                                            <div className="grid grid-cols-3 gap-1 p-2">
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                            </div>
+                                            
+                                            {/* Building top accent */}
+                                            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-blue-400 rounded-full"></div>
+                                        </div>
+                                        
+                                        {/* Building 2 - Medium */}
+                                        <div className="w-16 h-28 md:w-20 md:h-32 bg-gradient-to-t from-blue-600 via-blue-500 to-blue-400 rounded-2xl relative shadow-2xl animate-pulse" style={{animationDelay: '0.2s'}}>
+                                            {/* Windows grid */}
+                                            <div className="grid grid-cols-3 gap-1 p-2">
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                            </div>
+                                            
+                                            {/* Building top accent */}
+                                            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-blue-300 rounded-full"></div>
+                                        </div>
+                                        
+                                        {/* Building 3 - Shortest - Half Visible */}
+                                        <div className="w-16 h-26 md:w-20 md:h-30 bg-gradient-to-t from-blue-500 via-blue-400 to-blue-300 rounded-2xl relative shadow-2xl animate-pulse" style={{animationDelay: '0.4s', clipPath: 'inset(0 50% 0 0)'}}>
+                                            {/* Windows grid */}
+                                            <div className="grid grid-cols-3 gap-1 p-2">
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
+                                            </div>
+                                            
+                                            {/* Building top accent */}
+                                            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-blue-200 rounded-full"></div>
+                                        </div>
                             </div>
 
-                            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 md:p-6 rounded-xl border border-yellow-200">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-600 rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                                    <Star className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                                    {/* Background cityscape effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-blue-100/30 to-transparent rounded-2xl pointer-events-none"></div>
                                 </div>
-                                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">Quality Assurance</h3>
-                                <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4">Every family tested and verified for accuracy, performance, and compliance.</p>
-                                <div className="text-xs text-yellow-600 font-medium">Launch Feature</div>
+                                <div className="flex gap-2 mt-6">
+                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                </div>
                             </div>
 
-                            <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 md:p-6 rounded-xl border border-red-200">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-red-600 rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                                    <Globe className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                            {/* Customize Collection Card */}
+                            <div className="col-span-1 md:col-span-1 row-span-1 bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
+                                        Your library.<br />
+                                        <span className="text-orange-500">Your way.</span>
+                                    </h3>
+                                    <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6">
+                                        Organize and customize collections that fit your workflow.
+                                    </p>
                                 </div>
-                                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">Regional Compliance</h3>
-                                <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4">Built to meet Malaysian building codes, standards, and local requirements.</p>
-                                <div className="text-xs text-red-600 font-medium">Launch Feature</div>
+                                <div className="flex-1 flex items-center justify-center relative mt-6 z-0">
+                                    <div className="relative w-40 h-40 md:w-48 md:h-48">
+                                        {/* Background glow effect */}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-amber-400/20 rounded-full blur-3xl animate-pulse"></div>
+                                        
+                                        {/* Folder stack container */}
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            {/* Folder 1 - Bottom (Back) */}
+                                            <div className="absolute w-20 h-16 md:w-24 md:h-18 lg:w-28 lg:h-20 bg-gradient-to-br from-orange-700 via-orange-600 to-orange-500 rounded-xl relative shadow-xl transform -rotate-3 transition-all duration-500 hover:rotate-0 hover:scale-110 hover:z-30" style={{left: '0px', top: '12px', zIndex: 1}}>
+                                                {/* Folder tab */}
+                                                <div className="absolute -top-2 left-0 w-8 md:w-10 lg:w-12 h-4 bg-gradient-to-br from-orange-700 to-orange-600 rounded-t-lg"></div>
+                                                {/* Folder content area */}
+                                                <div className="absolute top-1 left-1 right-1 bottom-1 bg-gradient-to-br from-orange-600/30 to-orange-500/30 rounded-lg"></div>
+                                                {/* Folder icon */}
+                                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl md:text-2xl lg:text-3xl opacity-40">
+                                                    📁
+                                                </div>
+                                                {/* Highlight */}
+                                                <div className="absolute top-1 left-1 w-2 h-2 bg-white/30 rounded-full blur-sm"></div>
+                                            </div>
+                                            
+                                            {/* Folder 2 - Middle */}
+                                            <div className="absolute w-20 h-16 md:w-24 md:h-18 lg:w-28 lg:h-20 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-400 rounded-xl relative shadow-xl transform -rotate-1 transition-all duration-500 hover:rotate-0 hover:scale-110 hover:z-30" style={{left: '0px', top: '4px', zIndex: 2}}>
+                                                {/* Folder tab */}
+                                                <div className="absolute -top-2 left-0 w-8 md:w-10 lg:w-12 h-4 bg-gradient-to-br from-orange-600 to-orange-500 rounded-t-lg"></div>
+                                                {/* Folder content area */}
+                                                <div className="absolute top-1 left-1 right-1 bottom-1 bg-gradient-to-br from-orange-500/30 to-orange-400/30 rounded-lg"></div>
+                                                {/* Folder icon */}
+                                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl md:text-2xl lg:text-3xl opacity-40">
+                                                    📁
+                                                </div>
+                                                {/* Highlight */}
+                                                <div className="absolute top-1 left-1 w-2 h-2 bg-white/30 rounded-full blur-sm"></div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Additional floating elements */}
+                                        <div className="absolute inset-0 pointer-events-none">
+                                            <div className="absolute top-4 right-4 w-1 h-1 bg-yellow-300 rounded-full animate-ping"></div>
+                                            <div className="absolute bottom-6 left-6 w-0.5 h-0.5 bg-amber-300 rounded-full animate-ping" style={{animationDelay: '0.3s'}}></div>
+                                            <div className="absolute top-8 left-4 w-0.5 h-0.5 bg-orange-300 rounded-full animate-ping" style={{animationDelay: '0.6s'}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2 mt-6">
+                                    <div className="w-5 h-5 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                    <div className="w-5 h-5 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                    <div className="w-5 h-5 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                </div>
                             </div>
 
-                            <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-4 md:p-6 rounded-xl border border-indigo-200">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-lg flex items-center justify-center mb-3 md:mb-4">
-                                    <Lock className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                            {/* Updates Card */}
+                            <div className="col-span-1 md:col-span-1 row-span-1 bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
+                                        Always<br />
+                                        <span className="text-purple-500">evolving.</span>
+                                    </h3>
+                                    <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6">
+                                        Monthly updates keep you ahead.
+                                    </p>
                                 </div>
-                                <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2">Regular Updates</h3>
-                                <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4">Monthly updates with new families, features, and improvements.</p>
-                                <div className="text-xs text-indigo-600 font-medium">Ongoing</div>
+                                <div className="flex-1 flex items-center justify-center relative mt-6 z-0">
+                                    <div className="relative w-40 h-40 md:w-48 md:h-48">
+                                        {/* Background glow effect */}
+                                        <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-violet-400/20 rounded-full blur-3xl animate-pulse"></div>
+                                        
+                                        {/* Main evolution graphic */}
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            {/* Central hub */}
+                                            <div className="relative w-20 h-20 md:w-24 md:h-24">
+                                                {/* Central circle */}
+                                                <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-600 rounded-full shadow-2xl flex items-center justify-center relative">
+                                                    
+                                                    {/* Rotating ring */}
+                                                    <div className="absolute inset-0 border-2 border-purple-300 rounded-full animate-spin" style={{animationDuration: '4s'}}></div>
+                                                    <div className="absolute inset-1 border-1 border-purple-200 rounded-full animate-spin" style={{animationDuration: '3s', animationDirection: 'reverse'}}></div>
+                                                </div>
+                                                
+                                                {/* Orbiting elements */}
+                                                <div className="absolute inset-0 animate-spin" style={{animationDuration: '6s'}}>
+                                                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-purple-400 rounded-full shadow-lg"></div>
+                                                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-purple-300 rounded-full shadow-lg"></div>
+                                                    <div className="absolute top-1/2 -left-2 transform -translate-y-1/2 w-2 h-2 bg-purple-500 rounded-full shadow-lg"></div>
+                                                    <div className="absolute top-1/2 -right-2 transform -translate-y-1/2 w-2 h-2 bg-purple-300 rounded-full shadow-lg"></div>
+                                                </div>
+                                                
+                                                {/* Counter-rotating elements */}
+                                                <div className="absolute inset-0 animate-spin" style={{animationDuration: '8s', animationDirection: 'reverse'}}>
+                                                    <div className="absolute top-1 left-1 w-1 h-1 bg-violet-400 rounded-full"></div>
+                                                    <div className="absolute bottom-1 right-1 w-1 h-1 bg-violet-400 rounded-full"></div>
+                                                    <div className="absolute top-1 right-1 w-0.5 h-0.5 bg-violet-300 rounded-full"></div>
+                                                    <div className="absolute bottom-1 left-1 w-0.5 h-0.5 bg-violet-300 rounded-full"></div>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Outer evolution indicators */}
+                                            <div className="absolute inset-0 animate-pulse">
+                                                <div className="absolute top-4 left-4 w-1 h-1 bg-purple-400 rounded-full animate-bounce"></div>
+                                                <div className="absolute top-6 right-6 w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.5s'}}></div>
+                                                <div className="absolute bottom-4 left-6 w-1 h-1 bg-purple-300 rounded-full animate-bounce" style={{animationDelay: '1s'}}></div>
+                                                <div className="absolute bottom-6 right-4 w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '1.5s'}}></div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Floating particles */}
+                                        <div className="absolute inset-0 pointer-events-none">
+                                            <div className="absolute top-2 left-2 w-0.5 h-0.5 bg-purple-300 rounded-full animate-ping"></div>
+                                            <div className="absolute top-3 right-3 w-0.5 h-0.5 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '0.3s'}}></div>
+                                            <div className="absolute bottom-2 left-3 w-0.5 h-0.5 bg-purple-300 rounded-full animate-ping" style={{animationDelay: '0.6s'}}></div>
+                                            <div className="absolute bottom-3 right-2 w-0.5 h-0.5 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '0.9s'}}></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2 mt-6">
+                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
+                                </div>
                             </div>
                         </div>
 
-                        {/* Launch Timeline */}
-                        <div className="bg-white rounded-xl p-6 md:p-8 border border-gray-200 shadow-sm">
-                            <div className="text-center mb-8">
-                                <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">Launch Timeline</h3>
-                                <p className="text-sm md:text-base text-gray-600">Our journey to revolutionize Revit workflows</p>
-                            </div>
-
-                            {/* Progress Bar */}
-                            <div className="mb-8">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-gray-600">Progress</span>
-                                    <span className="text-sm font-medium text-blue-600">25% Complete</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-3">
-                                    <div className="bg-blue-600 h-3 rounded-full transition-all duration-1000" style={{width: '25%'}}></div>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {/* Phase 1 - Beta Testing */}
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <Users className="w-6 h-6 text-white" />
-                                    </div>
-                                    <h4 className="font-semibold text-gray-900 mb-2">Beta Testing</h4>
-                                    <p className="text-sm text-gray-600 mb-2">Selected members get early access</p>
-                                    <div className="text-xs text-blue-600 font-medium">Currently Active</div>
-                                </div>
-
-                                {/* Phase 2 - Soft Launch */}
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <Rocket className="w-6 h-6 text-gray-500" />
-                                    </div>
-                                    <h4 className="font-semibold text-gray-900 mb-2">Soft Launch</h4>
-                                    <p className="text-sm text-gray-600 mb-2">Waiting list members get access</p>
-                                    <div className="text-xs text-gray-500 font-medium">End of October</div>
-                    </div>
-
-                                {/* Phase 3 - Public Launch */}
-                                <div className="text-center">
-                                    <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-3">
-                                        <CheckCircle className="w-6 h-6 text-gray-500" />
-                                    </div>
-                                    <h4 className="font-semibold text-gray-900 mb-2">Public Launch</h4>
-                                    <p className="text-sm text-gray-600 mb-2">Available to everyone</p>
-                                    <div className="text-xs text-gray-500 font-medium">Early November</div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
 
+            {/* Plugin Screenshots Section */}
+            <div className="py-12 md:py-20 bg-white">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-7xl mx-auto">
+                        {/* Features Section */}
+                        <div className="features-section">
+                            <div className="section-header text-center mb-12 md:mb-16">
+                                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-gray-900 px-4">
+                                See ProRVT in Action
+                                </h2>
+                                <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
+                                    Three simple steps to transform your Revit workflow
+                                </p>
+                            </div>
 
+                            <div className="features-grid space-y-6 md:space-y-8 max-w-4xl mx-auto">
+                                {/* Feature 1: Smart Search */}
+                                <div className="bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
+                                    <div className="flex items-center gap-6 md:gap-8 flex-1">
+                                        <div className="feature-content flex-1 relative z-10">
+                                            <div className="feature-number w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">1</div>
+                                            <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
+                                                Smart Search<br />
+                                                <span className="text-green-500">Revit Families.</span>
+                                            </h3>
+                                            <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6 max-w-lg">
+                                                Find exactly what you need in seconds with AI-powered search. No more endless scrolling through folders.
+                                            </p>
+                                        </div>
+                                        <div className="feature-image flex-shrink-0 relative z-0">
+                                            <div className="w-80 h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-lg">
+                                                <img 
+                                                    src="/images/demo-1.gif" 
+                                                    alt="Smart Search Demo" 
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Background decorative elements */}
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <div className="absolute top-8 right-8 w-32 h-32 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse"></div>
+                                        <div className="absolute bottom-8 left-8 w-24 h-24 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
+                                    </div>
+                                </div>
 
-            {/* CTA Section */}
-            <div className="py-12 md:py-20 bg-blue-600">
-                <div className="container mx-auto px-4 text-center">
-                    <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-white px-4">
-                        Don't Miss Out on Early Access
-                    </h2>
-                    <p className="text-base md:text-xl mb-6 md:mb-8 text-blue-100 max-w-2xl mx-auto px-4">
-                        Join 500+ architects on our waiting list. Get exclusive early access and launch pricing when ProRVT launches at the end of October.
-                    </p>
-                    <div className="max-w-md mx-auto px-4">
-                        <div className="flex flex-col gap-3">
-                            <input
-                                type="email"
-                                placeholder="Enter your email address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 md:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 text-base"
-                            />
-                            <Button 
-                                className="w-full bg-white text-blue-600 hover:bg-gray-100 px-6 py-3 md:py-4 font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 text-base"
-                                onClick={() => handleWaitingListSignup(email)}
-                                disabled={isLoading}
-                            >
-                                {isLoading ? 'Joining...' : 'Join Now'}
-                    </Button>
+                                {/* Feature 2: Drag and Drop */}
+                                <div className="bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
+                                    <div className="flex items-center gap-6 md:gap-8 flex-1">
+                                        <div className="feature-content flex-1 relative z-10">
+                                            <div className="feature-number w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">2</div>
+                                            <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
+                                                Drag and Drop<br />
+                                                <span className="text-blue-500">Ready to Use.</span>
+                                            </h3>
+                                            <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6 max-w-lg">
+                                                Simply drag families directly into your Revit project. Fully optimized and ready to use instantly.
+                                            </p>
+                                        </div>
+                                        <div className="feature-image flex-shrink-0 relative z-0">
+                                            <div className="w-80 h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-lg">
+                                                <img 
+                                                    src="/images/demo-2.gif" 
+                                                    alt="Drag and Drop Demo" 
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Background decorative elements */}
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <div className="absolute top-8 right-8 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse"></div>
+                                        <div className="absolute bottom-8 left-8 w-24 h-24 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
+                                    </div>
+                                </div>
+
+                                {/* Feature 3: Customize Collections */}
+                                <div className="bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
+                                    <div className="flex items-center gap-6 md:gap-8 flex-1">
+                                        <div className="feature-content flex-1 relative z-10">
+                                            <div className="feature-number w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">3</div>
+                                            <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
+                                                Customize Revit<br />
+                                                <span className="text-orange-500">Families Collection.</span>
+                                            </h3>
+                                            <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6 max-w-lg">
+                                                Organize your library your way. Create custom collections that match your workflow and projects.
+                                            </p>
+                                        </div>
+                                        <div className="feature-image flex-shrink-0 relative z-0">
+                                            <div className="w-80 h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-lg">
+                                                <video 
+                                                    src="/images/demo.mp4" 
+                                                    autoPlay
+                                                    muted
+                                                    loop
+                                                    playsInline
+                                                    webkit-playsinline="true"
+                                                    className="w-full h-full object-cover"
+                                                >
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Background decorative elements */}
+                                    <div className="absolute inset-0 pointer-events-none">
+                                        <div className="absolute top-8 right-8 w-32 h-32 bg-gradient-to-r from-orange-400/10 to-amber-400/10 rounded-full blur-3xl animate-pulse"></div>
+                                        <div className="absolute bottom-8 left-8 w-24 h-24 bg-gradient-to-r from-orange-400/10 to-amber-400/10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        {message && (
-                            <p className={`text-sm mt-3 ${message.includes('Thank you') ? 'text-green-200' : 'text-red-200'}`}>
-                                {message}
-                            </p>
-                        )}
-                        <p className="text-xs md:text-sm text-blue-100 mt-3">
-                            Free to join • No spam • Unsubscribe anytime
-                        </p>
                     </div>
                 </div>
             </div>
