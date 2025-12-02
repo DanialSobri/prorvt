@@ -1,45 +1,112 @@
-import { Button } from '@/components/custom/button';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/custom/password-input';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import React, { useState } from 'react';
-import { Zap, Building, Star, LogIn } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { 
+    LogIn, 
+    Download, 
+    Star, 
+    Zap, 
+    Plug, 
+    Library, 
+    Heart, 
+    ArrowRight, 
+    CheckCircle2, 
+    AlertTriangle,
+    ChevronRight,
+    Search,
+    Box,
+    Camera,
+    PenTool,
+    Boxes,
+    Check,
+    MessageCircle
+} from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import PocketBase from 'pocketbase';
 
 const pb = new PocketBase('https://brezelbits.xyz');
 
+const PROFESSIONS = [
+    'Architect',
+    'Assistant Architect',
+    'Architectural Technician',
+    'Architectural Drafter',
+    'Interior Designer',
+    'Structural Engineer',
+    'Structural Technician',
+    'Structural Drafter',
+    'MEP Engineer',
+    'Mechanical Engineer',
+    'Electrical Engineer',
+    'Plumbing Engineer',
+    'MEP Technician',
+    'MEP Drafter',
+    'Civil Engineer',
+    'Civil/CAD Technician',
+    'BIM Manager',
+    'BIM Coordinator',
+    'BIM Modeler',
+    'BIM Analyst',
+    'Construction Project Manager',
+    'Site/Construction Engineer',
+    'Estimator',
+    'Construction Coordinator',
+    'Quantity Surveyor',
+    'Cost Engineer',
+    "Owner's Representative",
+    'Facilities Manager',
+    'Lecturer / Instructor',
+    'Student',
+    'Design Consultant',
+    'Visualization Specialist',
+    'Others'
+];
+
 const HomePage: React.FC = () => {
     const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [profession, setProfession] = useState('');
+    const [companyName, setCompanyName] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [professionOpen, setProfessionOpen] = useState(false);
+    const [professionSearch, setProfessionSearch] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
+    const [showSignupModal, setShowSignupModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [daysUntilLaunch, setDaysUntilLaunch] = useState(0);
+    const [showInstallModal, setShowInstallModal] = useState(false);
 
-    // Calculate days until November 1st
-    React.useEffect(() => {
-        const calculateDaysUntilLaunch = () => {
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            const launchDate = new Date(currentYear, 10, 1); // November 1st (month is 0-indexed)
-            
-            // If November 1st has passed this year, set it for next year
-            if (today > launchDate) {
-                launchDate.setFullYear(currentYear + 1);
-            }
-            
-            const timeDiff = launchDate.getTime() - today.getTime();
-            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-            setDaysUntilLaunch(daysDiff);
-        };
+    const handleDownloadClick = () => {
+        setShowSignupModal(true);
+    };
 
-        calculateDaysUntilLaunch();
-        // Update every hour to keep it accurate
-        const interval = setInterval(calculateDaysUntilLaunch, 3600000);
-        
-        return () => clearInterval(interval);
-    }, []);
-
-    const handleWaitingListSignup = async (emailValue: string) => {
-        if (!emailValue || !emailValue.includes('@')) {
+    const handleSignup = async () => {
+        // Validation
+        if (!email || !email.includes('@')) {
             setMessage('Please enter a valid email address');
+            return;
+        }
+        if (!phone || phone.trim() === '') {
+            setMessage('Please enter your phone number');
+            return;
+        }
+        if (!profession || profession.trim() === '') {
+            setMessage('Please select your profession');
+            return;
+        }
+        if (!password || password.length < 7) {
+            setMessage('Password must be at least 7 characters long');
+            return;
+        }
+        if (password !== confirmPassword) {
+            setMessage("Passwords don't match");
             return;
         }
 
@@ -47,684 +114,725 @@ const HomePage: React.FC = () => {
         setMessage('');
 
         try {
-            const data = {
-                "email": emailValue
+            // Generate username from email (part before @)
+            const username = email.split('@')[0];
+
+            // Create user account using users collection (same as sign-up page)
+            const new_user: any = {
+                "username": username,
+                "email": email,
+                "emailVisibility": true,
+                "password": password,
+                "passwordConfirm": confirmPassword,
+                "name": username,
+                "subcription": "freemium",
+                "phone": phone,
+                "profession": profession,
+                "role": "user"
             };
 
-            await pb.collection('waitinglist').create(data);
+            // Add company name only if provided
+            if (companyName && companyName.trim() !== '') {
+                new_user.companyName = companyName.trim();
+            }
+
+            // Create user account
+            const record = await pb.collection('users').create(new_user);
+
+            if (!record.created) {
+                console.error('User creation failed.');
+                setMessage('Failed to create account. Please try again.');
+                return;
+            }
+
+            // Automatically authenticate the user
+            const authData = await pb.collection('users').authWithPassword(email, password);
+            localStorage.setItem('token', authData.token);
+
+            setShowSignupModal(false);
             setShowSuccessModal(true);
+            
+            // Trigger download
+            handleDownloadPlugin();
+            
+            // Reset form
             setEmail('');
-        } catch (error) {
-            console.error('Error signing up for waiting list:', error);
+            setPhone('');
+            setProfession('');
+            setCompanyName('');
+            setPassword('');
+            setConfirmPassword('');
+            
+            setTimeout(() => {
+                setShowSuccessModal(false);
+                setShowInstallModal(true);
+            }, 2000);
+        } catch (error: any) {
+            console.error('Error signing up:', error);
+            // Handle specific error messages
+            if (error?.response?.data) {
+                const errorData = error.response.data;
+                if (errorData.email) {
+                    setMessage(`Email: ${errorData.email.message || 'Email already exists'}`);
+                } else if (errorData.username) {
+                    setMessage(`Username: ${errorData.username.message || 'Username already exists'}`);
+                } else {
+                    setMessage(errorData.message || 'Something went wrong. Please try again.');
+                }
+            } else {
             setMessage('Something went wrong. Please try again.');
+            }
         } finally {
             setIsLoading(false);
         }
     };
 
+    const handleJoinSupportChannel = () => {
+        window.open('https://chat.whatsapp.com/EL1ik8vC8po4ZvTkwGdy9v', '_blank');
+    };
+
+    const handleDownloadPlugin = () => {
+        const downloadUrl = 'https://brezelbits.xyz/api/files/4vgijwqgtjn1n1y/i0783hisy7h10jl/revit_addin_prorvt_1_0_utrrkyztc1.4.zip';
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = 'revit_addin_prorvt_1_0_utrrkyztc1.4.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
-        <div className="min-h-screen bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900">
-            {/* Logo */}
-            <div className="fixed top-6 left-6 z-50">
-                <a 
-                    href="https://projectrvt.com/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="block hover:opacity-80 transition-opacity duration-300"
-                >
+        <div className="min-h-screen bg-background">
+            {/* Announcement Bar */}
+            {/* <div className="border-b bg-muted/50">
+                <div className="container mx-auto px-6 py-3">
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                        <div className="h-2 w-2 rounded-full bg-blue-600"></div>
+                        <span>New: Premium Malaysian-compliant families now available</span>
+                        <ChevronRight className="h-4 w-4" />
+                    </div>
+                </div>
+            </div> */}
+
+            {/* Header */}
+            <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center">
                     <img 
                         src="/images/logo.png" 
                         alt="ProRVT Logo" 
-                        className="h-12 w-auto filter dark:invert-0"
-                    />
-                </a>
-            </div>
-
-            {/* Navigation */}
-            <div className="fixed top-6 right-6 z-50 flex items-center space-x-4">
-                {/* <a 
-                    href="/portfolio" 
-                    className="text-white hover:text-gray-300 transition-colors px-4 py-2"
-                >
-                    Portfolio
-                </a> */}
+                            className="h-8 w-auto"
+                        />
+                    </div>
+                    <nav className="flex items-center gap-6">
+                        <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                            Features
+                        </a>
+                        <a href="#install" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                            Install
+                        </a>
                 <Button
-                    variant="outline"
-                    className="group relative overflow-hidden backdrop-blur-md bg-white/80 border-gray-300 text-gray-900 px-6 py-2 hover:bg-gray-50 hover:border-gray-400 transform hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md"
+                            variant="ghost"
+                            size="sm"
                     onClick={() => window.location.href = '/sign-in'}
                 >
-                    <span className="relative z-10 flex items-center gap-2">
-                        <LogIn className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                            <LogIn className="w-4 h-4 mr-2" />
                         Sign In
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 group-hover:opacity-100 opacity-0 transition-opacity" />
-                    <div className="absolute inset-0 rounded-lg ring-1 ring-gray-200 group-hover:ring-gray-300 transition-all" />
                 </Button>
+                    </nav>
             </div>
+            </header>
 
-            {/* Hero Section - Waiting List */}
-            <div className="relative pt-20 pb-12 md:py-20 bg-white">
-                <div className="container mx-auto px-4">
+            {/* Hero Section */}
+            <section className="container mx-auto px-6 py-24 md:py-32">
                     <div className="max-w-4xl mx-auto text-center">
-                        {/* Release Date Badge */}
-                        <div className="inline-flex items-center px-3 py-2 md:px-4 md:py-2 bg-blue-100 text-blue-800 rounded-full text-xs md:text-sm font-medium mb-6 md:mb-8">
-                            <div className="w-2 h-2 bg-blue-600 rounded-full mr-2 animate-pulse"></div>
-                            Coming Early November 🎉
-                        </div>
-
-                        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 text-gray-900 leading-tight px-2">
-                            Join the ProRVT Waiting List
+                    <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+                        One Platform. Every Revit Family. Instantly Accessible.
                         </h1>
-                        <p className="text-lg md:text-xl lg:text-2xl mb-6 md:mb-8 text-gray-600 leading-relaxed max-w-3xl mx-auto px-4">
-                            Be the first to access our revolutionary Revit plugin with Malaysian-compliant families. 
-                            Get early access and exclusive launch pricing.
-                        </p>
-
-                        {/* Email Signup Form */}
-                        <div className="max-w-md mx-auto mb-6 md:mb-8 px-4">
-                            <div className="flex flex-col gap-3">
-                                <input
-                                    type="email"
-                                    placeholder="Enter your email address"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full px-4 py-3 md:py-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 text-base"
-                                />
+                    <p className="text-xl text-muted-foreground mb-8 leading-relaxed max-w-2xl mx-auto">
+                        Centralized family access with seamless Revit integration, enabling teams to search 
+                        and utilize families instantly for faster, consistent BIM workflows.
+                    </p>
+                    <div className="flex items-center justify-center gap-4">
+                        <Button 
+                            size="lg"
+                            className="h-11 px-8"
+                            onClick={handleDownloadClick}
+                        >
+                            <Download className="w-4 h-4 mr-2" />
+                            Download Plugin
+                        </Button>
                                 <Button 
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 md:py-4 font-semibold rounded-lg transition-all duration-300 disabled:opacity-50 text-base"
-                                    onClick={() => handleWaitingListSignup(email)}
-                                    disabled={isLoading}
-                                >
-                                    {isLoading ? 'Joining...' : 'Join Waiting List'}
+                            variant="ghost" 
+                            size="lg"
+                            className="h-11 px-8"
+                            onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                        >
+                            Browse Features
+                            <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
                             </div>
-                            {message && (
-                                <p className={`text-sm mt-3 ${message.includes('Thank you') ? 'text-green-600' : 'text-red-600'}`}>
-                                    {message}
-                                </p>
-                            )}
-                            <p className="text-xs md:text-sm text-gray-500 mt-3">
-                                No spam, unsubscribe anytime. We'll only email you about the launch.
-                            </p>
-                        </div>
-
-                        {/* Benefits for Early Adopters */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8 md:mb-12 px-4">
-                            <div className="bg-blue-50 p-4 md:p-6 rounded-xl">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto mb-3 md:mb-4">
-                                    <Star className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                                </div>
-                                <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">Early Access</h3>
-                                <p className="text-xs md:text-sm text-gray-600">Get 2 weeks early access before public launch</p>
-                            </div>
-                            <div className="bg-green-50 p-4 md:p-6 rounded-xl">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-green-600 rounded-lg flex items-center justify-center mx-auto mb-3 md:mb-4">
-                                    <Zap className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                                </div>
-                                <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">Launch Discount</h3>
-                                <p className="text-xs md:text-sm text-gray-600">50% off for the first 3 months</p>
-                            </div>
-                            <div className="bg-purple-50 p-4 md:p-6 rounded-xl sm:col-span-2 lg:col-span-1">
-                                <div className="w-10 h-10 md:w-12 md:h-12 bg-purple-600 rounded-lg flex items-center justify-center mx-auto mb-3 md:mb-4">
-                                    <Building className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                                </div>
-                                <h3 className="font-semibold text-gray-900 mb-2 text-sm md:text-base">Priority Support</h3>
-                                <p className="text-xs md:text-sm text-gray-600">Direct access to our development team</p>
-                            </div>
-                        </div>
-                        
-                        {/* Demo Video Preview */}
-                        <div className="max-w-3xl mx-auto px-4">
-                            <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-gray-200">
-                                <div className="bg-gray-100 h-6 md:h-8 flex items-center px-3 md:px-4">
-                                    <div className="flex space-x-1 md:space-x-2">
-                                        <div className="w-2 h-2 md:w-3 md:h-3 bg-red-500 rounded-full"></div>
-                                        <div className="w-2 h-2 md:w-3 md:h-3 bg-yellow-500 rounded-full"></div>
-                                        <div className="w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full"></div>
-                                    </div>
-                                    <div className="ml-2 md:ml-4 text-xs md:text-sm text-gray-600">ProRVT Plugin Preview</div>
-                                </div>
-                                <video 
-                                    src="/images/demo.mp4" 
-                                    autoPlay
-                                    muted
-                                    loop
-                                    playsInline
-                                    webkit-playsinline="true"
-                                className="w-full h-auto"
-                                >
-                                    Your browser does not support the video tag.
-                                </video>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-            </div>
+            </section>
 
-            {/* Waiting List Stats */}
-            <div className="py-12 md:py-16 bg-gray-50">
-                <div className="container mx-auto px-4">
-                    <div className="text-center mb-8 md:mb-12">
-                        <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-3 md:mb-4 px-4">
-                            Join to be the first 500 architects for limited waiting list
+            {/* Features Section */}
+            <section id="features" className="container mx-auto px-6 py-24 bg-muted/50">
+                <div className="max-w-6xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                            Powerful Features for Your Revit Workflow
                         </h2>
-                        <p className="text-sm md:text-base text-gray-600 px-4">
-                            Be part of the exclusive group of early adopters to experience ProRVT
-                        </p>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
-                        <div className="text-center">
-                            <div className="text-2xl md:text-3xl font-bold text-blue-600 mb-2">500</div>
-                            <div className="text-sm md:text-base text-gray-600">Limited Spots</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-2xl md:text-3xl font-bold text-green-600 mb-2">500+</div>
-                            <div className="text-sm md:text-base text-gray-600">Families</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="text-2xl md:text-3xl font-bold text-purple-600 mb-2">{daysUntilLaunch}</div>
-                            <div className="text-sm md:text-base text-gray-600">Days Until Launch</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Features Bento Grid */}
-            <div id="features" className="py-12 md:py-20 bg-gradient-to-br from-gray-50 to-gray-100">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-7xl mx-auto">
-                        <div className="text-center mb-12 md:mb-16">
-                            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-gray-900 px-4">
-                                What's Coming in ProRVT?
-                            </h2>
-                            <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
-                                Get a preview of the revolutionary features that will transform your Revit workflow. 
-                                These are the capabilities you'll have access to when ProRVT launches.
-                        </p>
-                    </div>
-
-                        {/* Bento Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 grid-rows-auto md:grid-rows-2 gap-4 md:gap-6 max-w-6xl mx-auto mb-12 md:mb-16 max-h-[90vh]">
-                            {/* Smart Search Card - spans 2 columns */}
-                            <div className="col-span-1 md:col-span-2 row-span-1 bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
-                                <div className="relative z-10">
-                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
-                                        Find families.<br />
-                                        <span className="text-green-500">Instantly.</span>
-                                    </h3>
-                                    <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6 max-w-lg">
-                                        AI-powered search that works at the speed of thought.
-                                    </p>
-                                </div>
-                                <div className="flex-1 flex items-center justify-center relative mt-6 z-0">
-                                    <div className="relative w-40 h-40 md:w-48 md:h-48">
-                                        {/* Background glow effect */}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-emerald-400/20 rounded-full blur-3xl animate-pulse"></div>
-                                        
-                                        {/* Main lightning bolt */}
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="relative">
-                                                <div className="text-6xl md:text-7xl text-green-500 animate-pulse filter drop-shadow-2xl">
-                                                    ⚡
-                                                </div>
-                                                {/* Lightning glow effect */}
-                                                <div className="absolute inset-0 text-6xl md:text-7xl text-green-400 animate-pulse blur-sm opacity-50">
-                                                    ⚡
-                                                </div>
-                                            </div>
-                            </div>
-
-                                        {/* Enhanced particles */}
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <div className="absolute w-2 h-2 bg-green-500 rounded-full animate-bounce shadow-xl" style={{top: '12%', left: '8%', animationDelay: '0s'}}></div>
-                                            <div className="absolute w-2 h-2 bg-green-400 rounded-full animate-bounce shadow-xl" style={{top: '8%', right: '12%', animationDelay: '0.5s'}}></div>
-                                            <div className="absolute w-2 h-2 bg-emerald-500 rounded-full animate-bounce shadow-xl" style={{bottom: '12%', left: '4%', animationDelay: '1s'}}></div>
-                                            <div className="absolute w-2 h-2 bg-emerald-400 rounded-full animate-bounce shadow-xl" style={{bottom: '8%', right: '8%', animationDelay: '1.5s'}}></div>
-                                            
-                                            {/* Additional sparkle effects */}
-                                            <div className="absolute w-1 h-1 bg-yellow-400 rounded-full animate-ping" style={{top: '20%', left: '20%', animationDelay: '0.3s'}}></div>
-                                            <div className="absolute w-1 h-1 bg-yellow-300 rounded-full animate-ping" style={{bottom: '20%', right: '20%', animationDelay: '0.8s'}}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2 mt-6">
-                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                </div>
-                            </div>
-
-                            {/* Library Card - tall, spans 2 rows */}
-                            <div className="col-span-1 md:col-span-1 md:row-span-2 bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
-                                <div className="relative z-10">
-                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
-                                        Built for<br />
-                                        <span className="text-blue-500">Malaysia.</span>
-                                    </h3>
-                                    <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6">
-                                        500+ families designed for local standards.
-                                    </p>
-                                </div>
-                                <div className="flex-1 flex items-center justify-center relative mt-6 z-0">
-                                    <div className="flex gap-4 items-end">
-                                        {/* Building 1 - Tallest */}
-                                        <div className="w-16 h-24 md:w-20 md:h-28 bg-gradient-to-t from-blue-700 via-blue-600 to-blue-500 rounded-2xl relative shadow-2xl animate-pulse">
-                                            {/* Building number */}
-                                            <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-3xl md:text-4xl font-bold text-blue-500 drop-shadow-lg z-5">
-                                                500+
-                                            </div>
-                                            
-                                            {/* Windows grid */}
-                                            <div className="grid grid-cols-3 gap-1 p-2">
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                            </div>
-                                            
-                                            {/* Building top accent */}
-                                            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-blue-400 rounded-full"></div>
-                                        </div>
-                                        
-                                        {/* Building 2 - Medium */}
-                                        <div className="w-16 h-28 md:w-20 md:h-32 bg-gradient-to-t from-blue-600 via-blue-500 to-blue-400 rounded-2xl relative shadow-2xl animate-pulse" style={{animationDelay: '0.2s'}}>
-                                            {/* Windows grid */}
-                                            <div className="grid grid-cols-3 gap-1 p-2">
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                            </div>
-                                            
-                                            {/* Building top accent */}
-                                            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-blue-300 rounded-full"></div>
-                                        </div>
-                                        
-                                        {/* Building 3 - Shortest - Half Visible */}
-                                        <div className="w-16 h-26 md:w-20 md:h-30 bg-gradient-to-t from-blue-500 via-blue-400 to-blue-300 rounded-2xl relative shadow-2xl animate-pulse" style={{animationDelay: '0.4s', clipPath: 'inset(0 50% 0 0)'}}>
-                                            {/* Windows grid */}
-                                            <div className="grid grid-cols-3 gap-1 p-2">
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                                <div className="w-full aspect-square bg-white/50 rounded-lg shadow-sm"></div>
-                                            </div>
-                                            
-                                            {/* Building top accent */}
-                                            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-4 h-1 bg-blue-200 rounded-full"></div>
-                                        </div>
-                            </div>
-
-                                    {/* Background cityscape effect */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-blue-100/30 to-transparent rounded-2xl pointer-events-none"></div>
-                                </div>
-                                <div className="flex gap-2 mt-6">
-                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                </div>
-                            </div>
-
-                            {/* Customize Collection Card */}
-                            <div className="col-span-1 md:col-span-1 row-span-1 bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
-                                <div className="relative z-10">
-                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
-                                        Your library.<br />
-                                        <span className="text-orange-500">Your way.</span>
-                                    </h3>
-                                    <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6">
-                                        Organize and customize collections that fit your workflow.
-                                    </p>
-                                </div>
-                                <div className="flex-1 flex items-center justify-center relative mt-6 z-0">
-                                    <div className="relative w-40 h-40 md:w-48 md:h-48">
-                                        {/* Background glow effect */}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-amber-400/20 rounded-full blur-3xl animate-pulse"></div>
-                                        
-                                        {/* Folder stack container */}
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            {/* Folder 1 - Bottom (Back) */}
-                                            <div className="absolute w-20 h-16 md:w-24 md:h-18 lg:w-28 lg:h-20 bg-gradient-to-br from-orange-700 via-orange-600 to-orange-500 rounded-xl relative shadow-xl transform -rotate-3 transition-all duration-500 hover:rotate-0 hover:scale-110 hover:z-30" style={{left: '0px', top: '12px', zIndex: 1}}>
-                                                {/* Folder tab */}
-                                                <div className="absolute -top-2 left-0 w-8 md:w-10 lg:w-12 h-4 bg-gradient-to-br from-orange-700 to-orange-600 rounded-t-lg"></div>
-                                                {/* Folder content area */}
-                                                <div className="absolute top-1 left-1 right-1 bottom-1 bg-gradient-to-br from-orange-600/30 to-orange-500/30 rounded-lg"></div>
-                                                {/* Folder icon */}
-                                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl md:text-2xl lg:text-3xl opacity-40">
-                                                    📁
-                                                </div>
-                                                {/* Highlight */}
-                                                <div className="absolute top-1 left-1 w-2 h-2 bg-white/30 rounded-full blur-sm"></div>
-                                            </div>
-                                            
-                                            {/* Folder 2 - Middle */}
-                                            <div className="absolute w-20 h-16 md:w-24 md:h-18 lg:w-28 lg:h-20 bg-gradient-to-br from-orange-600 via-orange-500 to-orange-400 rounded-xl relative shadow-xl transform -rotate-1 transition-all duration-500 hover:rotate-0 hover:scale-110 hover:z-30" style={{left: '0px', top: '4px', zIndex: 2}}>
-                                                {/* Folder tab */}
-                                                <div className="absolute -top-2 left-0 w-8 md:w-10 lg:w-12 h-4 bg-gradient-to-br from-orange-600 to-orange-500 rounded-t-lg"></div>
-                                                {/* Folder content area */}
-                                                <div className="absolute top-1 left-1 right-1 bottom-1 bg-gradient-to-br from-orange-500/30 to-orange-400/30 rounded-lg"></div>
-                                                {/* Folder icon */}
-                                                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl md:text-2xl lg:text-3xl opacity-40">
-                                                    📁
-                                                </div>
-                                                {/* Highlight */}
-                                                <div className="absolute top-1 left-1 w-2 h-2 bg-white/30 rounded-full blur-sm"></div>
-                                            </div>
-                                        </div>
-                                        
-                                        {/* Additional floating elements */}
-                                        <div className="absolute inset-0 pointer-events-none">
-                                            <div className="absolute top-4 right-4 w-1 h-1 bg-yellow-300 rounded-full animate-ping"></div>
-                                            <div className="absolute bottom-6 left-6 w-0.5 h-0.5 bg-amber-300 rounded-full animate-ping" style={{animationDelay: '0.3s'}}></div>
-                                            <div className="absolute top-8 left-4 w-0.5 h-0.5 bg-orange-300 rounded-full animate-ping" style={{animationDelay: '0.6s'}}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2 mt-6">
-                                    <div className="w-5 h-5 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                    <div className="w-5 h-5 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                    <div className="w-5 h-5 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                </div>
-                            </div>
-
-                            {/* Updates Card */}
-                            <div className="col-span-1 md:col-span-1 row-span-1 bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
-                                <div className="relative z-10">
-                                    <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
-                                        Always<br />
-                                        <span className="text-purple-500">evolving.</span>
-                                    </h3>
-                                    <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6">
-                                        Monthly updates keep you ahead.
-                                    </p>
-                                </div>
-                                <div className="flex-1 flex items-center justify-center relative mt-6 z-0">
-                                    <div className="relative w-40 h-40 md:w-48 md:h-48">
-                                        {/* Background glow effect */}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-violet-400/20 rounded-full blur-3xl animate-pulse"></div>
-                                        
-                                        {/* Main evolution graphic */}
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            {/* Central hub */}
-                                            <div className="relative w-20 h-20 md:w-24 md:h-24">
-                                                {/* Central circle */}
-                                                <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-600 rounded-full shadow-2xl flex items-center justify-center relative">
-                                                    
-                                                    {/* Rotating ring */}
-                                                    <div className="absolute inset-0 border-2 border-purple-300 rounded-full animate-spin" style={{animationDuration: '4s'}}></div>
-                                                    <div className="absolute inset-1 border-1 border-purple-200 rounded-full animate-spin" style={{animationDuration: '3s', animationDirection: 'reverse'}}></div>
-                                                </div>
-                                                
-                                                {/* Orbiting elements */}
-                                                <div className="absolute inset-0 animate-spin" style={{animationDuration: '6s'}}>
-                                                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-purple-400 rounded-full shadow-lg"></div>
-                                                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-purple-300 rounded-full shadow-lg"></div>
-                                                    <div className="absolute top-1/2 -left-2 transform -translate-y-1/2 w-2 h-2 bg-purple-500 rounded-full shadow-lg"></div>
-                                                    <div className="absolute top-1/2 -right-2 transform -translate-y-1/2 w-2 h-2 bg-purple-300 rounded-full shadow-lg"></div>
-                                                </div>
-                                                
-                                                {/* Counter-rotating elements */}
-                                                <div className="absolute inset-0 animate-spin" style={{animationDuration: '8s', animationDirection: 'reverse'}}>
-                                                    <div className="absolute top-1 left-1 w-1 h-1 bg-violet-400 rounded-full"></div>
-                                                    <div className="absolute bottom-1 right-1 w-1 h-1 bg-violet-400 rounded-full"></div>
-                                                    <div className="absolute top-1 right-1 w-0.5 h-0.5 bg-violet-300 rounded-full"></div>
-                                                    <div className="absolute bottom-1 left-1 w-0.5 h-0.5 bg-violet-300 rounded-full"></div>
-                                                </div>
-                                            </div>
-                                            
-                                            {/* Outer evolution indicators */}
-                                            <div className="absolute inset-0 animate-pulse">
-                                                <div className="absolute top-4 left-4 w-1 h-1 bg-purple-400 rounded-full animate-bounce"></div>
-                                                <div className="absolute top-6 right-6 w-1.5 h-1.5 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.5s'}}></div>
-                                                <div className="absolute bottom-4 left-6 w-1 h-1 bg-purple-300 rounded-full animate-bounce" style={{animationDelay: '1s'}}></div>
-                                                <div className="absolute bottom-6 right-4 w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{animationDelay: '1.5s'}}></div>
-                                            </div>
-                                        </div>
-                                        
-                                        {/* Floating particles */}
-                                        <div className="absolute inset-0 pointer-events-none">
-                                            <div className="absolute top-2 left-2 w-0.5 h-0.5 bg-purple-300 rounded-full animate-ping"></div>
-                                            <div className="absolute top-3 right-3 w-0.5 h-0.5 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '0.3s'}}></div>
-                                            <div className="absolute bottom-2 left-3 w-0.5 h-0.5 bg-purple-300 rounded-full animate-ping" style={{animationDelay: '0.6s'}}></div>
-                                            <div className="absolute bottom-3 right-2 w-0.5 h-0.5 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '0.9s'}}></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2 mt-6">
-                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                    <div className="w-3 h-3 bg-gray-300 rounded-full transition-all duration-300 hover:bg-green-500 hover:scale-125"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            {/* Plugin Screenshots Section */}
-            <div className="py-12 md:py-20 bg-white">
-                <div className="container mx-auto px-4">
-                    <div className="max-w-7xl mx-auto">
-                        {/* Features Section */}
-                        <div className="features-section">
-                            <div className="section-header text-center mb-12 md:mb-16">
-                                <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6 text-gray-900 px-4">
-                                See ProRVT in Action
-                                </h2>
-                                <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed px-4">
-                                    Three simple steps to transform your Revit workflow
-                                </p>
-                            </div>
-
-                            <div className="features-grid space-y-6 md:space-y-8 max-w-4xl mx-auto">
-                                {/* Feature 1: Smart Search */}
-                                <div className="bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
-                                    <div className="flex items-center gap-6 md:gap-8 flex-1">
-                                        <div className="feature-content flex-1 relative z-10">
-                                            <div className="feature-number w-16 h-16 bg-green-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">1</div>
-                                            <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
-                                                Smart Search<br />
-                                                <span className="text-green-500">Revit Families.</span>
-                                            </h3>
-                                            <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6 max-w-lg">
-                                                Find exactly what you need in seconds with AI-powered search. No more endless scrolling through folders.
-                                            </p>
-                                        </div>
-                                        <div className="feature-image flex-shrink-0 relative z-0">
-                                            <div className="w-80 h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-lg">
-                                                <img 
-                                                    src="/images/demo-1.gif" 
-                                                    alt="Smart Search Demo" 
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {/* Background decorative elements */}
-                                    <div className="absolute inset-0 pointer-events-none">
-                                        <div className="absolute top-8 right-8 w-32 h-32 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full blur-3xl animate-pulse"></div>
-                                        <div className="absolute bottom-8 left-8 w-24 h-24 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
-                                    </div>
-                                </div>
-
-                                {/* Feature 2: Drag and Drop */}
-                                <div className="bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
-                                    <div className="flex items-center gap-6 md:gap-8 flex-1">
-                                        <div className="feature-content flex-1 relative z-10">
-                                            <div className="feature-number w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">2</div>
-                                            <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
-                                                Drag and Drop<br />
-                                                <span className="text-blue-500">Ready to Use.</span>
-                                            </h3>
-                                            <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6 max-w-lg">
-                                                Simply drag families directly into your Revit project. Fully optimized and ready to use instantly.
-                                            </p>
-                                        </div>
-                                        <div className="feature-image flex-shrink-0 relative z-0">
-                                            <div className="w-80 h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-lg">
-                                                <img 
-                                                    src="/images/demo-2.gif" 
-                                                    alt="Drag and Drop Demo" 
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {/* Background decorative elements */}
-                                    <div className="absolute inset-0 pointer-events-none">
-                                        <div className="absolute top-8 right-8 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-3xl animate-pulse"></div>
-                                        <div className="absolute bottom-8 left-8 w-24 h-24 bg-gradient-to-r from-blue-400/10 to-cyan-400/10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
-                                    </div>
-                                </div>
-
-                                {/* Feature 3: Customize Collections */}
-                                <div className="bg-white rounded-3xl p-8 md:p-12 lg:p-16 relative overflow-hidden min-h-[300px] md:min-h-[35vh] flex flex-col transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl border border-gray-100">
-                                    <div className="flex items-center gap-6 md:gap-8 flex-1">
-                                        <div className="feature-content flex-1 relative z-10">
-                                            <div className="feature-number w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">3</div>
-                                            <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-3 tracking-tight">
-                                                Customize Revit<br />
-                                                <span className="text-orange-500">Families Collection.</span>
-                                            </h3>
-                                            <p className="text-sm md:text-base lg:text-lg text-gray-500 leading-relaxed mb-6 max-w-lg">
-                                                Organize your library your way. Create custom collections that match your workflow and projects.
-                                            </p>
-                                        </div>
-                                        <div className="feature-image flex-shrink-0 relative z-0">
-                                            <div className="w-80 h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 shadow-lg">
-                                                <video 
-                                                    src="/images/demo.mp4" 
-                                                    autoPlay
-                                                    muted
-                                                    loop
-                                                    playsInline
-                                                    webkit-playsinline="true"
-                                                    className="w-full h-full object-cover"
-                                                >
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {/* Background decorative elements */}
-                                    <div className="absolute inset-0 pointer-events-none">
-                                        <div className="absolute top-8 right-8 w-32 h-32 bg-gradient-to-r from-orange-400/10 to-amber-400/10 rounded-full blur-3xl animate-pulse"></div>
-                                        <div className="absolute bottom-8 left-8 w-24 h-24 bg-gradient-to-r from-orange-400/10 to-amber-400/10 rounded-full blur-2xl animate-pulse" style={{animationDelay: '1s'}}></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Footer Section */}
-            <footer className="bg-gray-900 text-white py-12 md:py-16">
-                <div className="container mx-auto px-4">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8">
-                        <div className="md:col-span-2">
-                            <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">ProRVT</h3>
-                            <p className="text-gray-400 mb-4 md:mb-6 max-w-md text-sm md:text-base">
-                                Transforming architectural design with regional Revit families. 
-                                Create professional BIM models faster with our Malaysian-compliant component library.
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            Everything you need to streamline your BIM workflow and access premium Revit families instantly.
                             </p>
-                            <div className="flex space-x-4">
-                                <a href="https://www.linkedin.com/company/projectrvt" 
-                                   target="_blank" 
-                                   rel="noopener noreferrer" 
-                                   className="text-gray-400 hover:text-blue-400 transition-colors">
-                                    <svg className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-                                    </svg>
-                                </a>
+                        </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {/* Feature 1 */}
+                        <Card>
+                            <CardHeader>
+                                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center mb-4">
+                                    <Plug className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                </div>
+                                <CardTitle>Native Revit Plugin</CardTitle>
+                                <CardDescription>
+                                    Seamlessly integrated plugin for instant access to thousands of Revit families directly within your Revit environment.
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+
+                        {/* Feature 2 */}
+                        <Card>
+                            <CardHeader>
+                                <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center mb-4">
+                                    <Zap className="w-5 h-5 text-green-600 dark:text-green-400" />
+                                </div>
+                                <CardTitle>One-Click Import</CardTitle>
+                                <CardDescription>
+                                    Import families directly into your Revit model with a single click. No more manual downloads or file management.
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+
+                        {/* Feature 3 */}
+                        <Card>
+                            <CardHeader>
+                                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center mb-4">
+                                    <Star className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                            </div>
+                                <CardTitle>Premium Family Library</CardTitle>
+                                <CardDescription>
+                                    Access to premium, Malaysian-compliant families exclusive to ProRVT subscribers. Quality families for professional BIM projects.
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+
+                        {/* Feature 4 */}
+                        <Card>
+                            <CardHeader>
+                                <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center mb-4">
+                                    <Search className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                                </div>
+                                <CardTitle>Smart Collection Search</CardTitle>
+                                <CardDescription>
+                                    Intelligent search functionality that helps you find the exact family you need quickly. Filter by category, type, and specifications.
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+
+                        {/* Feature 5 */}
+                        <Card>
+                            <CardHeader>
+                                <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center mb-4">
+                                    <Heart className="w-5 h-5 text-pink-600 dark:text-pink-400" />
+                            </div>
+                                <CardTitle>Personal Favorites</CardTitle>
+                                <CardDescription>
+                                    Save your frequently used families to a personal favorites list for instant access and faster project workflows.
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
+
+                        {/* Feature 6 */}
+                        <Card>
+                            <CardHeader>
+                                <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center mb-4">
+                                    <Library className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                                </div>
+                                <CardTitle>Organized Collections</CardTitle>
+                                <CardDescription>
+                                    Families organized into logical collections making it easy to browse and discover new components for your projects.
+                                </CardDescription>
+                            </CardHeader>
+                        </Card>
                             </div>
                         </div>
+            </section>
+
+            {/* Customization Showcase Section */}
+            <section className="container mx-auto px-6 py-24 bg-muted/30">
+                <div className="max-w-6xl mx-auto">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        {/* Left Side - Text Content */}
                         <div>
-                            <h4 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Product</h4>
-                            <ul className="space-y-2 text-gray-400 text-sm md:text-base">
-                                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Download</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
-                            </ul>
+                            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
+                                Powerful customization, still easy to use.
+                            </h2>
+                            <h3 className="text-xl font-bold mb-4">
+                                Family Collections
+                                    </h3>
+                            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
+                                Add and organize Revit families in seconds. Multiple collection types that allow you to 
+                                showcase and manage your families professionally and with ease.
+                                    </p>
+                            
+                            {/* Icons */}
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
+                                    <Box className="w-5 h-5 text-muted-foreground" />
+                                    </div>
+                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
+                                    <Camera className="w-5 h-5 text-muted-foreground" />
+                                </div>
+                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
+                                    <PenTool className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
+                                    <Boxes className="w-5 h-5 text-muted-foreground" />
                         </div>
-                        <div>
-                            <h4 className="text-base md:text-lg font-semibold mb-3 md:mb-4">Company</h4>
-                            <ul className="space-y-2 text-gray-400 text-sm md:text-base">
-                                <li><a href="https://projectrvt.com/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">About</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
-                                <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="border-t border-gray-800 mt-8 md:mt-12 pt-6 md:pt-8 text-center text-gray-400 text-sm md:text-base">
-                        <p>&copy; 2024 ProRVT. All rights reserved.</p>
+                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
+                                    <Download className="w-5 h-5 text-muted-foreground" />
                     </div>
                 </div>
+            </div>
+
+                        {/* Right Side - Visual Mockup */}
+                        <div className="relative">
+                            <div className="bg-gradient-to-br from-blue-500 via-purple-500 via-pink-500 to-orange-500 rounded-2xl p-4 shadow-2xl">
+                                <div className="bg-card rounded-lg overflow-hidden shadow-xl max-w-sm mx-auto">
+                                    <img 
+                                        src="/images/plugin-interface.png" 
+                                        alt="ProRVT Plugin Interface - Family Library with sidebar navigation and item grid"
+                                        className="w-auto"
+                                    />
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </section>
+
+            {/* How to Install Section */}
+            <section id="install" className="container mx-auto px-6 py-24">
+                <div className="max-w-4xl mx-auto">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                            How to Install
+                            </h2>
+                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                            Get started with ProRVT in just a few simple steps
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        {/* Step 1 */}
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="flex items-start gap-4">
+                                    <Badge variant="default" className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-bold">
+                                        1
+                                    </Badge>
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold mb-2">Download the Plugin</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Click the download button above and complete the signup process. The plugin installer 
+                                            will automatically download to your computer.
+                                    </p>
+                                </div>
+                                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Step 2 */}
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="flex items-start gap-4">
+                                    <Badge variant="default" className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-bold">
+                                        2
+                                    </Badge>
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold mb-2">Run the Installer</h3>
+                                        <p className="text-sm text-muted-foreground mb-3">
+                                            Locate the downloaded installer file and double-click to run it.
+                                        </p>
+                                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                                            <div className="flex items-start gap-3">
+                                                <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                                                <div>
+                                                    <p className="text-sm font-semibold mb-1">
+                                                        Self-Signed Certificate Notice
+                                                    </p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        The plugin uses a self-signed certificate. Windows may show a security warning. 
+                                                        Click <strong>"Run anyway"</strong> or <strong>"More info"</strong> then 
+                                                        <strong>"Run anyway"</strong> to proceed with the installation.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Step 3 */}
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="flex items-start gap-4">
+                                    <Badge variant="default" className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-bold">
+                                        3
+                                    </Badge>
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold mb-2">Follow Installation Wizard</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Follow the on-screen instructions to complete the installation. The installer will 
+                                            automatically detect your Revit installation and configure the plugin.
+                                    </p>
+                                </div>
+                                            </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Step 4 */}
+                        <Card>
+                            <CardContent className="pt-6">
+                                <div className="flex items-start gap-4">
+                                    <Badge variant="default" className="w-8 h-8 rounded-full flex items-center justify-center p-0 text-sm font-bold">
+                                        4
+                                    </Badge>
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold mb-2">Launch Revit</h3>
+                                        <p className="text-sm text-muted-foreground">
+                                            Open Revit and look for the ProRVT tab in the ribbon. Sign in with your account 
+                                            to start accessing the family library.
+                                        </p>
+                                        </div>
+                            </div>
+                            </CardContent>
+                        </Card>
+                                </div>
+                            </div>
+            </section>
+
+            {/* Footer */}
+            <footer className="border-t bg-muted/50 py-12">
+                <div className="container mx-auto px-6">
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div>
+                            <p className="text-sm text-muted-foreground">
+                                ProRVT is a ProjectRVT project, created by the team
+                                    </p>
+                                </div>
+                        <div className="flex items-center gap-4">
+                            <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={handleJoinSupportChannel}
+                                className="text-sm"
+                            >
+                                <MessageCircle className="w-4 h-4 mr-2" />
+                                Join Support Channel
+                            </Button>
+                            <p className="text-sm text-muted-foreground">
+                                2025 ProRVT © All Right Reserved
+                            </p>
+                                        </div>
+                                    </div>
+                                </div>
             </footer>
+
+            {/* Signup Modal */}
+            <Dialog open={showSignupModal} onOpenChange={setShowSignupModal}>
+                <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Sign Up to Download</DialogTitle>
+                        <DialogDescription>
+                            Create your account to download the ProRVT plugin and join our support community.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-6">
+                        {/* Two Column Layout */}
+                        <div className="grid md:grid-cols-2 gap-4">
+                            {/* Left Column */}
+                            <div className="space-y-4">
+                                {/* Email */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Email *</Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="Enter your email address"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                    />
+                            </div>
+
+                                {/* Phone */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="phone">Phone Number *</Label>
+                                    <Input
+                                        id="phone"
+                                        type="tel"
+                                        placeholder="Enter your phone number"
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                    />
+                                                </div>
+                                                
+                                {/* Profession */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="profession">Profession *</Label>
+                                    <Popover open={professionOpen} onOpenChange={setProfessionOpen}>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                role="combobox"
+                                                aria-expanded={professionOpen}
+                                                className="w-full justify-between"
+                                                id="profession"
+                                            >
+                                                {profession || "Select your profession"}
+                                                <ChevronRight className="ml-2 h-4 w-4 shrink-0 rotate-90 opacity-50" />
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-[400px] p-0" align="start">
+                                            <Command>
+                                                <CommandInput 
+                                                    placeholder="Search profession..." 
+                                                    value={professionSearch}
+                                                    onValueChange={setProfessionSearch}
+                                                />
+                                                <CommandList>
+                                                    <CommandEmpty>
+                                                        <div className="py-2">
+                                                            <CommandItem
+                                                                onSelect={() => {
+                                                                    setProfession('Others');
+                                                                    setProfessionOpen(false);
+                                                                    setProfessionSearch('');
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={`mr-2 h-4 w-4 ${
+                                                                        profession === 'Others' ? "opacity-100" : "opacity-0"
+                                                                    }`}
+                                                                />
+                                                                Others
+                                                            </CommandItem>
+                                                        </div>
+                                                    </CommandEmpty>
+                                                    <CommandGroup>
+                                                        {PROFESSIONS.filter((prof) =>
+                                                            prof.toLowerCase().includes(professionSearch.toLowerCase())
+                                                        ).map((prof) => (
+                                                            <CommandItem
+                                                                key={prof}
+                                                                value={prof}
+                                                                onSelect={() => {
+                                                                    setProfession(prof);
+                                                                    setProfessionOpen(false);
+                                                                    setProfessionSearch('');
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={`mr-2 h-4 w-4 ${
+                                                                        profession === prof ? "opacity-100" : "opacity-0"
+                                                                    }`}
+                                                                />
+                                                                {prof}
+                                                            </CommandItem>
+                                                        ))}
+                                                        {professionSearch && 
+                                                         !PROFESSIONS.some((prof) =>
+                                                            prof.toLowerCase().includes(professionSearch.toLowerCase())
+                                                        ) && (
+                                                            <CommandItem
+                                                                onSelect={() => {
+                                                                    setProfession('Others');
+                                                                    setProfessionOpen(false);
+                                                                    setProfessionSearch('');
+                                                                }}
+                                                            >
+                                                                <Check
+                                                                    className={`mr-2 h-4 w-4 ${
+                                                                        profession === 'Others' ? "opacity-100" : "opacity-0"
+                                                                    }`}
+                                                                />
+                                                                Others
+                                                            </CommandItem>
+                                                        )}
+                                                    </CommandGroup>
+                                                </CommandList>
+                                            </Command>
+                                        </PopoverContent>
+                                    </Popover>
+                                                </div>
+                                                
+                                {/* Company Name (Optional) */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="company">Company Name (Optional)</Label>
+                                    <Input
+                                        id="company"
+                                        type="text"
+                                        placeholder="Enter your company name"
+                                        value={companyName}
+                                        onChange={(e) => setCompanyName(e.target.value)}
+                                    />
+                                                </div>
+                                            </div>
+                                            
+                            {/* Right Column */}
+                            <div className="space-y-4">
+                                {/* Password */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Password *</Label>
+                                    <PasswordInput
+                                        id="password"
+                                        placeholder="Enter your password (min 7 characters)"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                    />
+                                        </div>
+                                        
+                                {/* Confirm Password */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="confirmPassword">Confirm Password *</Label>
+                                    <PasswordInput
+                                        id="confirmPassword"
+                                        placeholder="Confirm your password"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                    />
+                        </div>
+
+                                {/* Info Box */}
+                                <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                                    <p className="text-sm font-semibold">Account Benefits:</p>
+                                    <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+                                        <li>Instant plugin download</li>
+                                        <li>Access to premium families</li>
+                                        <li>Join support community</li>
+                                        <li>Free forever subscription</li>
+                                    </ul>
+                    </div>
+                </div>
+            </div>
+
+                        {/* Error Message */}
+                        {message && (
+                            <div className={`text-sm p-3 rounded-lg ${
+                                message.includes('valid') || message.includes('phone') || message.includes('profession') || message.includes('Password') || message.includes("don't match") 
+                                    ? 'text-destructive bg-destructive/10' 
+                                    : 'text-green-600 bg-green-50'
+                            }`}>
+                                {message}
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <div className="space-y-3">
+                            <Button 
+                                className="w-full"
+                                onClick={handleSignup}
+                                disabled={isLoading}
+                                size="lg"
+                            >
+                                {isLoading ? 'Signing up...' : 'Sign Up & Download'}
+                            </Button>
+                            <p className="text-xs text-muted-foreground text-center">
+                                By signing up, you agree to our terms and will be added to our support channel.
+                                            </p>
+                                        </div>
+                                            </div>
+                </DialogContent>
+            </Dialog>
 
             {/* Success Modal */}
             <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-                <DialogContent className="sm:max-w-md rounded-2xl">
+                <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="text-center text-2xl font-bold text-gray-900 mb-4">
-                            🎉 Welcome to ProRVT! 🎉
-                        </DialogTitle>
+                        <DialogTitle className="text-center">🎉 Welcome to ProRVT!</DialogTitle>
                     </DialogHeader>
                     <div className="text-center py-6">
                         <div className="text-6xl mb-4">🎊</div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                            Thank You for Joining Our Waiting List!
-                        </h3>
-                        <p className="text-gray-600 mb-6 leading-relaxed">
-                            You're now part of an exclusive group of architects who will get early access to ProRVT. 
-                            We'll notify you as soon as we launch at the end of October 2025!
+                        <h3 className="text-lg font-semibold mb-3">
+                            Account Created Successfully!
+                                            </h3>
+                        <p className="text-sm text-muted-foreground mb-6">
+                            Your account has been created and you're now logged in. Your download will start automatically. 
+                            You'll also receive an email with installation instructions and access to our support channel.
                         </p>
-                        <div className="space-y-3">
+                        <div className="flex items-center justify-center gap-2 text-green-600">
+                            <CheckCircle2 className="w-5 h-5" />
+                            <span className="text-sm">Download started</span>
+                                            </div>
+                                        </div>
+                </DialogContent>
+            </Dialog>
+
+            {/* Install Instructions Modal */}
+            <Dialog open={showInstallModal} onOpenChange={setShowInstallModal}>
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Installation Instructions</DialogTitle>
+                        <DialogDescription>
+                            Follow these steps to complete your ProRVT installation
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                            <div className="flex items-start gap-3">
+                                <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-sm font-semibold mb-1">
+                                        Important: Self-Signed Certificate
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        When Windows shows a security warning, click <strong>"Run anyway"</strong> to proceed. 
+                                        This is normal for self-signed certificates.
+                                            </p>
+                                        </div>
+                                            </div>
+                                        </div>
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm">
+                                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                <span>1. Run the downloaded installer</span>
+                                    </div>
+                            <div className="flex items-center gap-2 text-sm">
+                                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                <span>2. Click "Run anyway" when prompted</span>
+                                    </div>
+                            <div className="flex items-center gap-2 text-sm">
+                                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                <span>3. Follow the installation wizard</span>
+                                </div>
+                            <div className="flex items-center gap-2 text-sm">
+                                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                                <span>4. Launch Revit and sign in</span>
+                            </div>
+                        </div>
+                        <div className="pt-4 border-t">
                             <Button 
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl"
+                                className="w-full"
                                 onClick={() => {
-                                    setShowSuccessModal(false);
-                                    // Scroll to demo video
-                                    document.getElementById('features')?.scrollIntoView({ 
-                                        behavior: 'smooth',
-                                        block: 'start'
-                                    });
+                                    handleJoinSupportChannel();
+                                    setShowInstallModal(false);
                                 }}
                             >
-                                Discover our features
+                                Join Support Channel
+                                <ArrowRight className="w-4 h-4 ml-2" />
                             </Button>
-                            <Button 
-                                variant="outline"
-                                className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-3 rounded-xl"
-                                onClick={() => setShowSuccessModal(false)}
-                            >
-                                Close
-                            </Button>
-                        </div>
-                        <div className="mt-6 text-sm text-gray-500">
-                            <p>✨ You'll receive exclusive updates and early access perks!</p>
                         </div>
                     </div>
                 </DialogContent>
