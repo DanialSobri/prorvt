@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/custom/password-input';
 import { Badge } from '@/components/ui/badge';
@@ -10,22 +10,16 @@ import React, { useState } from 'react';
 import { 
     LogIn, 
     Download, 
-    Star, 
-    Zap, 
     Plug, 
-    Library, 
-    Heart, 
     ArrowRight, 
     CheckCircle2, 
     AlertTriangle,
     ChevronRight,
     Search,
-    Box,
-    Camera,
-    PenTool,
     Boxes,
     Check,
-    MessageCircle
+    Crown,
+    Bookmark
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import PocketBase from 'pocketbase';
@@ -229,7 +223,7 @@ const HomePage: React.FC = () => {
                             Features
                         </a>
                         <a href="#install" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-                            Install
+                            Installation
                         </a>
                 <Button
                             variant="ghost"
@@ -275,151 +269,166 @@ const HomePage: React.FC = () => {
                 </div>
             </section>
 
-            {/* Features Section */}
-            <section id="features" className="container mx-auto px-6 py-24 bg-muted/50">
-                <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                            Powerful Features for Your Revit Workflow
-                        </h2>
-                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                            Everything you need to streamline your BIM workflow and access premium Revit families instantly.
+            {/* Features Section with Mockup */}
+            <section id="features" className="relative py-24 md:py-32 overflow-hidden min-h-[800px]">
+                {/* Gradient Background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-100 via-purple-100 via-pink-100 to-blue-50 dark:from-blue-950/20 dark:via-purple-950/20 dark:via-pink-950/20 dark:to-blue-950/10"></div>
+                
+                <div className="container mx-auto px-6 relative z-10">
+                    <div className="max-w-7xl mx-auto">
+                        {/* Section Header */}
+                        <div className="text-center mb-16 relative z-20">
+                            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
+                                Powerful Features for Your Revit Workflow
+                            </h2>
+                            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                                Everything you need to streamline your BIM workflow and access premium Revit families instantly.
                             </p>
                         </div>
 
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* Feature 1 */}
-                        <Card>
-                            <CardHeader>
-                                <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center mb-4">
-                                    <Plug className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                                </div>
-                                <CardTitle>Native Revit Plugin</CardTitle>
-                                <CardDescription>
-                                    Seamlessly integrated plugin for instant access to thousands of Revit families directly within your Revit environment.
-                                </CardDescription>
-                            </CardHeader>
-                        </Card>
-
-                        {/* Feature 2 */}
-                        <Card>
-                            <CardHeader>
-                                <div className="w-10 h-10 rounded-lg bg-green-100 dark:bg-green-900/20 flex items-center justify-center mb-4">
-                                    <Zap className="w-5 h-5 text-green-600 dark:text-green-400" />
-                                </div>
-                                <CardTitle>One-Click Import</CardTitle>
-                                <CardDescription>
-                                    Import families directly into your Revit model with a single click. No more manual downloads or file management.
-                                </CardDescription>
-                            </CardHeader>
-                        </Card>
-
-                        {/* Feature 3 */}
-                        <Card>
-                            <CardHeader>
-                                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center mb-4">
-                                    <Star className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                            </div>
-                                <CardTitle>Premium Family Library</CardTitle>
-                                <CardDescription>
-                                    Access to premium, Malaysian-compliant families exclusive to ProRVT subscribers. Quality families for professional BIM projects.
-                                </CardDescription>
-                            </CardHeader>
-                        </Card>
-
-                        {/* Feature 4 */}
-                        <Card>
-                            <CardHeader>
-                                <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center mb-4">
-                                    <Search className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                                </div>
-                                <CardTitle>Smart Collection Search</CardTitle>
-                                <CardDescription>
-                                    Intelligent search functionality that helps you find the exact family you need quickly. Filter by category, type, and specifications.
-                                </CardDescription>
-                            </CardHeader>
-                        </Card>
-
-                        {/* Feature 5 */}
-                        <Card>
-                            <CardHeader>
-                                <div className="w-10 h-10 rounded-lg bg-pink-100 dark:bg-pink-900/20 flex items-center justify-center mb-4">
-                                    <Heart className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-                            </div>
-                                <CardTitle>Personal Favorites</CardTitle>
-                                <CardDescription>
-                                    Save your frequently used families to a personal favorites list for instant access and faster project workflows.
-                                </CardDescription>
-                            </CardHeader>
-                        </Card>
-
-                        {/* Feature 6 */}
-                        <Card>
-                            <CardHeader>
-                                <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/20 flex items-center justify-center mb-4">
-                                    <Library className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                                </div>
-                                <CardTitle>Organized Collections</CardTitle>
-                                <CardDescription>
-                                    Families organized into logical collections making it easy to browse and discover new components for your projects.
-                                </CardDescription>
-                            </CardHeader>
-                        </Card>
-                            </div>
-                        </div>
-            </section>
-
-            {/* Customization Showcase Section */}
-            <section className="container mx-auto px-6 py-24 bg-muted/30">
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-                        {/* Left Side - Text Content */}
-                        <div>
-                            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
-                                Powerful customization, still easy to use.
-                            </h2>
-                            <h3 className="text-xl font-bold mb-4">
-                                Family Collections
-                                    </h3>
-                            <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                                Add and organize Revit families in seconds. Multiple collection types that allow you to 
-                                showcase and manage your families professionally and with ease.
-                                    </p>
-                            
-                            {/* Icons */}
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
-                                    <Box className="w-5 h-5 text-muted-foreground" />
-                                    </div>
-                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
-                                    <Camera className="w-5 h-5 text-muted-foreground" />
-                                </div>
-                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
-                                    <PenTool className="w-5 h-5 text-muted-foreground" />
-                            </div>
-                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
-                                    <Boxes className="w-5 h-5 text-muted-foreground" />
-                        </div>
-                                <div className="w-12 h-12 rounded-lg border-2 border-border flex items-center justify-center hover:bg-muted transition-colors">
-                                    <Download className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                </div>
-            </div>
-
-                        {/* Right Side - Visual Mockup */}
+                        {/* Container for layered layout */}
                         <div className="relative">
-                            <div className="bg-gradient-to-br from-blue-500 via-purple-500 via-pink-500 to-orange-500 rounded-2xl p-4 shadow-2xl">
-                                <div className="bg-card rounded-lg overflow-hidden shadow-xl max-w-sm mx-auto">
-                                    <img 
-                                        src="/images/plugin-interface.png" 
-                                        alt="ProRVT Plugin Interface - Family Library with sidebar navigation and item grid"
-                                        className="w-auto"
-                                    />
-                        </div>
+                            {/* Grid Layout: Left Cards | Center Mockup | Right Cards */}
+                            <div className="grid lg:grid-cols-12 gap-8 items-center">
+                                {/* Left Column - Feature Cards */}
+                                <div className="lg:col-span-3 space-y-4 relative z-10">
+                                    {/* Feature 1 */}
+                                    <div className="group bg-background/95 backdrop-blur-md rounded-xl p-5 shadow-lg border border-border/50 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1 hover:border-blue-200/50 dark:hover:border-blue-800/50 transition-all duration-300 ease-out">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-blue-500/20">
+                                                <Plug className="w-6 h-6 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-semibold mb-1.5 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
+                                                    Instant Family Access
+                                                </h3>
+                                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                                    Plug straight into Revit and grab thousands of families instantly — no downloads, no hassle.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Feature 2 */}
+                                    <div className="group bg-background/95 backdrop-blur-md rounded-xl p-5 shadow-lg border border-border/50 hover:shadow-xl hover:shadow-green-500/10 hover:-translate-y-1 hover:border-green-200/50 dark:hover:border-green-800/50 transition-all duration-300 ease-out">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/30 dark:to-green-800/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-green-500/20">
+                                                <Download className="w-6 h-6 text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform duration-300" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-semibold mb-1.5 leading-tight group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-300">
+                                                    One‑Click Import
+                                                </h3>
+                                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                                    Drop families into your model with a single click. Fast, clean, and seamless.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Feature 3 */}
+                                    <div className="group bg-background/95 backdrop-blur-md rounded-xl p-5 shadow-lg border border-border/50 hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 hover:border-purple-200/50 dark:hover:border-purple-800/50 transition-all duration-300 ease-out">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 dark:from-purple-900/30 dark:to-purple-800/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-purple-500/20">
+                                                <Crown className="w-6 h-6 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform duration-300" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-semibold mb-1.5 leading-tight group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+                                                    Premium Library
+                                                </h3>
+                                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                                    Access exclusive, ISO‑compliant families built for professional BIM projects.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Center Column - Mockup */}
+                                <div className="lg:col-span-6 relative z-0">
+                                    {/* Browser Window Mockup */}
+                                    <div className="bg-card rounded-lg shadow-2xl overflow-hidden border border-border">
+                                        {/* Browser Header */}
+                                        <div className="bg-muted/50 border-b border-border px-4 py-3 flex items-center gap-2">
+                                            {/* Traffic Light Buttons (macOS style) */}
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                            </div>
+                                            {/* Browser Address Bar */}
+                                            <div className="flex-1 mx-4 bg-background rounded-md px-4 py-1.5 text-xs text-muted-foreground border border-border">
+                                                ProRVT Plugin Interface
+                                            </div>
+                                        </div>
+                                        {/* Browser Content */}
+                                        <div className="bg-background">
+                                            <img 
+                                                src="/images/plugin-interface.png" 
+                                                alt="ProRVT Plugin Interface - Family Library with sidebar navigation and item grid"
+                                                className="w-full h-auto"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Right Column - Feature Cards */}
+                                <div className="lg:col-span-3 space-y-4 relative z-10">
+                                    {/* Feature 4 */}
+                                    <div className="group bg-background/95 backdrop-blur-md rounded-xl p-5 shadow-lg border border-border/50 hover:shadow-xl hover:shadow-orange-500/10 hover:-translate-y-1 hover:border-orange-200/50 dark:hover:border-orange-800/50 transition-all duration-300 ease-out">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-900/30 dark:to-orange-800/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-orange-500/20">
+                                                <Search className="w-6 h-6 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform duration-300" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-semibold mb-1.5 leading-tight group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-300">
+                                                    Smart Search
+                                                </h3>
+                                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                                    Find exactly what you need with powerful filters by category, type, and specs.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Feature 5 */}
+                                    <div className="group bg-background/95 backdrop-blur-md rounded-xl p-5 shadow-lg border border-border/50 hover:shadow-xl hover:shadow-pink-500/10 hover:-translate-y-1 hover:border-pink-200/50 dark:hover:border-pink-800/50 transition-all duration-300 ease-out">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-100 to-pink-50 dark:from-pink-900/30 dark:to-pink-800/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-pink-500/20">
+                                                <Bookmark className="w-6 h-6 text-pink-600 dark:text-pink-400 group-hover:scale-110 transition-transform duration-300" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-semibold mb-1.5 leading-tight group-hover:text-pink-600 dark:group-hover:text-pink-400 transition-colors duration-300">
+                                                    Favorites List
+                                                </h3>
+                                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                                    Save your go‑to families for quick access and smoother workflows.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Feature 6 */}
+                                    <div className="group bg-background/95 backdrop-blur-md rounded-xl p-5 shadow-lg border border-border/50 hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1 hover:border-indigo-200/50 dark:hover:border-indigo-800/50 transition-all duration-300 ease-out">
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-indigo-900/30 dark:to-indigo-800/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-indigo-500/20">
+                                                <Boxes className="w-6 h-6 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-300" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h3 className="text-sm font-semibold mb-1.5 leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">
+                                                    Family Collections
+                                                </h3>
+                                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                                    Organize and showcase families in neat collections — professional and easy to manage.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
             </section>
 
             {/* How to Install Section */}
@@ -528,21 +537,7 @@ const HomePage: React.FC = () => {
             <footer className="border-t bg-muted/50 py-12">
                 <div className="container mx-auto px-6">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                        <div>
-                            <p className="text-sm text-muted-foreground">
-                                ProRVT is a ProjectRVT project, created by the team
-                                    </p>
-                                </div>
                         <div className="flex items-center gap-4">
-                            <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={handleJoinSupportChannel}
-                                className="text-sm"
-                            >
-                                <MessageCircle className="w-4 h-4 mr-2" />
-                                Join Support Channel
-                            </Button>
                             <p className="text-sm text-muted-foreground">
                                 2025 ProRVT © All Right Reserved
                             </p>
